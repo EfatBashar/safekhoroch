@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useLoans, useTransactions, formatCurrency } from "@/lib/store";
 import { loanSummary, summary, dailyBuckets } from "@/lib/calc";
 import { ArrowDownRight, ArrowUpRight, Wallet, Banknote } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -27,13 +28,15 @@ function Dashboard() {
   const s = summary(txs);
   const ls = loanSummary(loans);
   const week = dailyBuckets(txs, 7);
+  const { t, tc, lang } = useT();
+  const fc = (n: number) => formatCurrency(n, lang);
 
   return (
     <div className="px-5 pt-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-sm text-muted-foreground">Good day 👋</p>
-          <h1 className="text-2xl font-bold">Your Pocket</h1>
+          <p className="text-sm text-muted-foreground">{t.greeting}</p>
+          <h1 className="text-2xl font-bold">{t.yourPocket}</h1>
         </div>
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
           P
@@ -48,21 +51,19 @@ function Dashboard() {
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
         <div className="absolute -bottom-16 -left-8 h-44 w-44 rounded-full bg-white/5" />
         <p className="text-xs font-medium uppercase tracking-widest opacity-80">
-          Total balance
+          {t.totalBalance}
         </p>
-        <p className="mt-2 text-4xl font-bold tracking-tight">
-          {formatCurrency(s.balance)}
-        </p>
+        <p className="mt-2 text-4xl font-bold tracking-tight">{fc(s.balance)}</p>
         <div className="mt-6 flex gap-3">
           <MiniStat
             icon={<Wallet className="h-4 w-4" />}
-            label="Cash"
-            value={formatCurrency(s.cash)}
+            label={t.cash}
+            value={fc(s.cash)}
           />
           <MiniStat
             icon={<Banknote className="h-4 w-4" />}
-            label="Bank"
-            value={formatCurrency(s.bank)}
+            label={t.bank}
+            value={fc(s.bank)}
           />
         </div>
       </div>
@@ -72,22 +73,22 @@ function Dashboard() {
         <StatCard
           tone="income"
           icon={<ArrowDownRight className="h-5 w-5" />}
-          label="Income"
-          value={formatCurrency(s.income)}
+          label={t.income}
+          value={fc(s.income)}
         />
         <StatCard
           tone="expense"
           icon={<ArrowUpRight className="h-5 w-5" />}
-          label="Expense"
-          value={formatCurrency(s.expense)}
+          label={t.expense}
+          value={fc(s.expense)}
         />
       </div>
 
       {/* Weekly chart */}
       <section className="mt-6 rounded-2xl border bg-card p-4">
         <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="text-base font-semibold">This week</h2>
-          <span className="text-xs text-muted-foreground">Last 7 days</span>
+          <h2 className="text-base font-semibold">{t.thisWeek}</h2>
+          <span className="text-xs text-muted-foreground">{t.last7Days}</span>
         </div>
         <div className="h-40 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -141,58 +142,59 @@ function Dashboard() {
       <section className="mt-4 grid grid-cols-2 gap-3">
         <div className="rounded-2xl bg-loan p-4 text-loan-foreground">
           <p className="text-xs font-semibold uppercase tracking-wider opacity-80">
-            Owed to me
+            {t.owedToMe}
           </p>
-          <p className="mt-1 text-xl font-bold">{formatCurrency(ls.owedToMe)}</p>
+          <p className="mt-1 text-xl font-bold">{fc(ls.owedToMe)}</p>
         </div>
         <div className="rounded-2xl bg-debt p-4 text-debt-foreground">
           <p className="text-xs font-semibold uppercase tracking-wider opacity-80">
-            I owe
+            {t.iOwe}
           </p>
-          <p className="mt-1 text-xl font-bold">{formatCurrency(ls.iOwe)}</p>
+          <p className="mt-1 text-xl font-bold">{fc(ls.iOwe)}</p>
         </div>
       </section>
 
       {/* Recent */}
       <section className="mt-6">
         <div className="mb-2 flex items-baseline justify-between">
-          <h2 className="text-base font-semibold">Recent activity</h2>
-          <span className="text-xs text-muted-foreground">{txs.length} total</span>
+          <h2 className="text-base font-semibold">{t.recentActivity}</h2>
+          <span className="text-xs text-muted-foreground">{t.totalCount(txs.length)}</span>
         </div>
         <ul className="space-y-2">
-          {txs.slice(0, 5).map((t) => (
+          {txs.slice(0, 5).map((tx) => (
             <li
-              key={t.id}
+              key={tx.id}
               className="flex items-center justify-between rounded-2xl border bg-card p-3"
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${t.type === "income" ? "bg-income/15 text-income" : "bg-expense/15 text-expense"}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${tx.type === "income" ? "bg-income/15 text-income" : "bg-expense/15 text-expense"}`}
                 >
-                  {t.type === "income" ? (
+                  {tx.type === "income" ? (
                     <ArrowDownRight className="h-5 w-5" />
                   ) : (
                     <ArrowUpRight className="h-5 w-5" />
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">{t.category}</p>
+                  <p className="text-sm font-semibold">{tc(tx.category)}</p>
                   <p className="text-xs text-muted-foreground capitalize">
-                    {t.account} · {new Date(t.date).toLocaleDateString()}
+                    {tx.account === "cash" ? t.cash : t.bank} ·{" "}
+                    {new Date(tx.date).toLocaleDateString(lang === "bn" ? "bn-BD" : undefined)}
                   </p>
                 </div>
               </div>
               <p
-                className={`text-sm font-bold ${t.type === "income" ? "text-income" : "text-expense"}`}
+                className={`text-sm font-bold ${tx.type === "income" ? "text-income" : "text-expense"}`}
               >
-                {t.type === "income" ? "+" : "−"}
-                {formatCurrency(t.amount)}
+                {tx.type === "income" ? "+" : "−"}
+                {fc(tx.amount)}
               </p>
             </li>
           ))}
           {txs.length === 0 && (
             <li className="rounded-2xl border border-dashed bg-card/50 p-6 text-center text-sm text-muted-foreground">
-              Tap the + button to add your first transaction.
+              {t.emptyDashboard}
             </li>
           )}
         </ul>

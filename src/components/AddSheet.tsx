@@ -26,6 +26,7 @@ import {
 } from "@/lib/types";
 import { store } from "@/lib/store";
 import { toast } from "sonner";
+import { useT } from "@/lib/i18n";
 
 export function AddSheet({
   open,
@@ -34,6 +35,7 @@ export function AddSheet({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
+  const { t } = useT();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -41,12 +43,12 @@ export function AddSheet({
         className="mx-auto max-w-md rounded-t-3xl border-t-0 p-0"
       >
         <SheetHeader className="px-6 pt-6">
-          <SheetTitle className="text-2xl">Add new</SheetTitle>
+          <SheetTitle className="text-2xl">{t.addNew}</SheetTitle>
         </SheetHeader>
         <Tabs defaultValue="tx" className="px-6 pb-8 pt-2">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="tx">Transaction</TabsTrigger>
-            <TabsTrigger value="loan">Debt / Loan</TabsTrigger>
+            <TabsTrigger value="tx">{t.transaction}</TabsTrigger>
+            <TabsTrigger value="loan">{t.debtLoan}</TabsTrigger>
           </TabsList>
           <TabsContent value="tx" className="mt-4">
             <TxForm onDone={() => onOpenChange(false)} />
@@ -67,14 +69,15 @@ function TxForm({ onDone }: { onDone: () => void }) {
   const [account, setAccount] = useState<Account>("cash");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState("");
+  const { t, tc } = useT();
 
   const cats = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const n = parseFloat(amount);
-    if (!n || n <= 0) return toast.error("Enter a valid amount");
-    if (!category) return toast.error("Pick a category");
+    if (!n || n <= 0) return toast.error(t.enterValidAmount);
+    if (!category) return toast.error(t.pickCategory);
     store.addTransaction({
       id: crypto.randomUUID(),
       type,
@@ -84,7 +87,7 @@ function TxForm({ onDone }: { onDone: () => void }) {
       note: note || undefined,
       date: new Date(date).toISOString(),
     });
-    toast.success(`${type === "income" ? "Income" : "Expense"} added`);
+    toast.success(type === "income" ? t.incomeAdded : t.expenseAdded);
     onDone();
   };
 
@@ -99,7 +102,7 @@ function TxForm({ onDone }: { onDone: () => void }) {
           }}
           className={`rounded-lg py-2 text-sm font-semibold transition ${type === "expense" ? "bg-expense text-expense-foreground" : "text-muted-foreground"}`}
         >
-          Expense
+          {t.expense}
         </button>
         <button
           type="button"
@@ -109,12 +112,12 @@ function TxForm({ onDone }: { onDone: () => void }) {
           }}
           className={`rounded-lg py-2 text-sm font-semibold transition ${type === "income" ? "bg-income text-income-foreground" : "text-muted-foreground"}`}
         >
-          Income
+          {t.income}
         </button>
       </div>
 
       <div>
-        <Label htmlFor="amt">Amount</Label>
+        <Label htmlFor="amt">{t.amount}</Label>
         <Input
           id="amt"
           type="number"
@@ -130,36 +133,36 @@ function TxForm({ onDone }: { onDone: () => void }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label>Category</Label>
+          <Label>{t.category}</Label>
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="mt-1">
-              <SelectValue placeholder="Pick" />
+              <SelectValue placeholder={t.pick} />
             </SelectTrigger>
             <SelectContent>
               {cats.map((c) => (
                 <SelectItem key={c} value={c}>
-                  {c}
+                  {tc(c)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div>
-          <Label>Account</Label>
+          <Label>{t.account}</Label>
           <Select value={account} onValueChange={(v) => setAccount(v as Account)}>
             <SelectTrigger className="mt-1">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="cash">Cash</SelectItem>
-              <SelectItem value="bank">Bank</SelectItem>
+              <SelectItem value="cash">{t.cash}</SelectItem>
+              <SelectItem value="bank">{t.bank}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
       <div>
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date">{t.date}</Label>
         <Input
           id="date"
           type="date"
@@ -170,7 +173,7 @@ function TxForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <div>
-        <Label htmlFor="note">Note (optional)</Label>
+        <Label htmlFor="note">{t.noteOptional}</Label>
         <Textarea
           id="note"
           value={note}
@@ -181,7 +184,7 @@ function TxForm({ onDone }: { onDone: () => void }) {
       </div>
 
       <Button type="submit" className="h-12 w-full text-base">
-        Save
+        {t.save}
       </Button>
     </form>
   );
@@ -193,12 +196,13 @@ function LoanForm({ onDone }: { onDone: () => void }) {
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState("");
+  const { t } = useT();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const n = parseFloat(amount);
-    if (!person.trim()) return toast.error("Enter a name");
-    if (!n || n <= 0) return toast.error("Enter a valid amount");
+    if (!person.trim()) return toast.error(t.enterName);
+    if (!n || n <= 0) return toast.error(t.enterValidAmount);
     store.addLoan({
       id: crypto.randomUUID(),
       type,
@@ -208,7 +212,7 @@ function LoanForm({ onDone }: { onDone: () => void }) {
       note: note || undefined,
       settled: false,
     });
-    toast.success("Saved");
+    toast.success(t.saved);
     onDone();
   };
 
@@ -220,28 +224,28 @@ function LoanForm({ onDone }: { onDone: () => void }) {
           onClick={() => setType("lend")}
           className={`rounded-lg py-2 text-sm font-semibold transition ${type === "lend" ? "bg-loan text-loan-foreground" : "text-muted-foreground"}`}
         >
-          I Lent
+          {t.iLent}
         </button>
         <button
           type="button"
           onClick={() => setType("borrow")}
           className={`rounded-lg py-2 text-sm font-semibold transition ${type === "borrow" ? "bg-debt text-debt-foreground" : "text-muted-foreground"}`}
         >
-          I Borrowed
+          {t.iBorrowed}
         </button>
       </div>
 
       <div>
-        <Label>Person</Label>
+        <Label>{t.person}</Label>
         <Input
           value={person}
           onChange={(e) => setPerson(e.target.value)}
-          placeholder="Name"
+          placeholder={t.name}
           className="mt-1"
         />
       </div>
       <div>
-        <Label>Amount</Label>
+        <Label>{t.amount}</Label>
         <Input
           type="number"
           inputMode="decimal"
@@ -252,7 +256,7 @@ function LoanForm({ onDone }: { onDone: () => void }) {
         />
       </div>
       <div>
-        <Label>Date</Label>
+        <Label>{t.date}</Label>
         <Input
           type="date"
           value={date}
@@ -261,7 +265,7 @@ function LoanForm({ onDone }: { onDone: () => void }) {
         />
       </div>
       <div>
-        <Label>Note</Label>
+        <Label>{t.note}</Label>
         <Textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -270,7 +274,7 @@ function LoanForm({ onDone }: { onDone: () => void }) {
         />
       </div>
       <Button type="submit" className="h-12 w-full text-base">
-        Save
+        {t.save}
       </Button>
     </form>
   );

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { formatCurrency, useTransactions } from "@/lib/store";
 import { summary, monthlyBuckets } from "@/lib/calc";
 import { Wallet, Banknote } from "lucide-react";
+import { useT } from "@/lib/i18n";
 import {
   ResponsiveContainer,
   BarChart,
@@ -25,30 +26,32 @@ function AccountsPage() {
   const txs = useTransactions();
   const s = summary(txs);
   const months = monthlyBuckets(txs, 6);
+  const { t, lang } = useT();
+  const fc = (n: number) => formatCurrency(n, lang);
 
   return (
     <div className="px-5 pt-8">
-      <h1 className="text-2xl font-bold">Accounts</h1>
-      <p className="text-sm text-muted-foreground">Where your money lives</p>
+      <h1 className="text-2xl font-bold">{t.accountsTitle}</h1>
+      <p className="text-sm text-muted-foreground">{t.accountsSub}</p>
 
       <div className="mt-5 space-y-3">
         <AccountCard
           tone="cash"
           icon={<Wallet className="h-5 w-5" />}
-          label="Cash on hand"
-          value={s.cash}
+          label={t.cashOnHand}
+          value={fc(s.cash)}
         />
         <AccountCard
           tone="balance"
           icon={<Banknote className="h-5 w-5" />}
-          label="Bank account"
-          value={s.bank}
+          label={t.bankAccount}
+          value={fc(s.bank)}
         />
       </div>
 
       <section className="mt-6 rounded-2xl border bg-card p-4">
-        <h2 className="text-base font-semibold">Monthly summary</h2>
-        <p className="text-xs text-muted-foreground">Last 6 months</p>
+        <h2 className="text-base font-semibold">{t.monthlySummary}</h2>
+        <p className="text-xs text-muted-foreground">{t.last6Months}</p>
         <div className="mt-3 h-48 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={months} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -76,14 +79,14 @@ function AccountsPage() {
       </section>
 
       <section className="mt-4 rounded-2xl border bg-card p-4">
-        <h2 className="text-base font-semibold">Financial summary</h2>
+        <h2 className="text-base font-semibold">{t.financialSummary}</h2>
         <dl className="mt-3 space-y-2 text-sm">
-          <Row label="Total income" value={formatCurrency(s.income)} tone="income" />
-          <Row label="Total expense" value={formatCurrency(s.expense)} tone="expense" />
+          <Row label={t.totalIncome} value={fc(s.income)} tone="income" />
+          <Row label={t.totalExpense} value={fc(s.expense)} tone="expense" />
           <div className="my-2 h-px bg-border" />
           <Row
-            label="Net savings"
-            value={formatCurrency(s.income - s.expense)}
+            label={t.netSavings}
+            value={fc(s.income - s.expense)}
             tone={s.income - s.expense >= 0 ? "income" : "expense"}
             bold
           />
@@ -102,7 +105,7 @@ function AccountCard({
   tone: "cash" | "balance";
   icon: React.ReactNode;
   label: string;
-  value: number;
+  value: string;
 }) {
   const cls =
     tone === "cash"
@@ -119,7 +122,7 @@ function AccountCard({
         </div>
         <div>
           <p className="text-xs uppercase tracking-wider opacity-80">{label}</p>
-          <p className="text-xl font-bold">{formatCurrency(value)}</p>
+          <p className="text-xl font-bold">{value}</p>
         </div>
       </div>
     </div>
