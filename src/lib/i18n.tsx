@@ -253,9 +253,9 @@ const dict: Record<Lang, Strings> = {
       Other: "অন্যান্য",
     } as Record<string, string>,
   },
-} as const;
+};
 
-export type Dict = typeof dict.en;
+export type Dict = Strings;
 
 const LangContext = createContext<{
   lang: Lang;
