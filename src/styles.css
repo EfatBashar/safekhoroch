@@ -53,46 +53,52 @@
 :root {
   --radius: 1rem;
 
-  --background: oklch(0.985 0.005 250);
-  --foreground: oklch(0.18 0.03 260);
+  /* হাত-খরচ inspired palette */
+  --background: oklch(0.96 0.005 150);
+  --foreground: oklch(0.22 0.03 160);
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.03 260);
+  --card: oklch(0.99 0.003 150);
+  --card-foreground: oklch(0.22 0.03 160);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.03 260);
+  --popover-foreground: oklch(0.22 0.03 160);
 
-  --primary: oklch(0.55 0.18 265);
+  /* Deep forest green like হাত-খরচ header */
+  --primary: oklch(0.42 0.11 150);
   --primary-foreground: oklch(0.99 0 0);
 
-  --secondary: oklch(0.96 0.01 260);
-  --secondary-foreground: oklch(0.22 0.04 260);
+  --secondary: oklch(0.93 0.02 150);
+  --secondary-foreground: oklch(0.25 0.04 160);
 
-  --muted: oklch(0.96 0.01 260);
-  --muted-foreground: oklch(0.5 0.02 260);
+  --muted: oklch(0.94 0.01 150);
+  --muted-foreground: oklch(0.5 0.02 160);
 
-  --accent: oklch(0.94 0.03 260);
-  --accent-foreground: oklch(0.22 0.04 260);
+  --accent: oklch(0.92 0.04 150);
+  --accent-foreground: oklch(0.25 0.04 160);
 
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.92 0.01 260);
-  --input: oklch(0.92 0.01 260);
-  --ring: oklch(0.55 0.18 265);
+  --border: oklch(0.88 0.01 150);
+  --input: oklch(0.88 0.01 150);
+  --ring: oklch(0.42 0.11 150);
 
   /* Semantic finance tokens */
-  --income: oklch(0.7 0.17 155);
+  --income: oklch(0.55 0.16 150);
   --income-foreground: oklch(0.99 0 0);
-  --expense: oklch(0.62 0.22 22);
+  --expense: oklch(0.58 0.21 22);
   --expense-foreground: oklch(0.99 0 0);
-  --balance: oklch(0.58 0.18 250);
+  --balance: oklch(0.5 0.15 245);
   --balance-foreground: oklch(0.99 0 0);
-  --cash: oklch(0.65 0.16 195);
+  --cash: oklch(0.45 0.12 150);
   --cash-foreground: oklch(0.99 0 0);
   --loan: oklch(0.72 0.16 80);
-  --loan-foreground: oklch(0.18 0.03 260);
+  --loan-foreground: oklch(0.22 0.03 160);
   --debt: oklch(0.6 0.2 320);
   --debt-foreground: oklch(0.99 0 0);
+
+  /* FAB orange */
+  --fab: oklch(0.78 0.16 70);
+  --fab-foreground: oklch(0.25 0.05 70);
 }
 
 .dark {
