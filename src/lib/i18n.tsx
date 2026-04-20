@@ -4,7 +4,76 @@ export type Lang = "en" | "bn";
 
 const LANG_KEY = "etracker.lang.v1";
 
-const dict = {
+type Strings = {
+  appName: string;
+  home: string;
+  activity: string;
+  accounts: string;
+  loans: string;
+  add: string;
+  greeting: string;
+  yourPocket: string;
+  totalBalance: string;
+  cash: string;
+  bank: string;
+  income: string;
+  expense: string;
+  thisWeek: string;
+  last7Days: string;
+  owedToMe: string;
+  iOwe: string;
+  recentActivity: string;
+  totalCount: (n: number) => string;
+  emptyDashboard: string;
+  activityTitle: string;
+  activitySub: string;
+  all: string;
+  noTransactions: string;
+  items: (n: number) => string;
+  delete: string;
+  accountsTitle: string;
+  accountsSub: string;
+  cashOnHand: string;
+  bankAccount: string;
+  monthlySummary: string;
+  last6Months: string;
+  financialSummary: string;
+  totalIncome: string;
+  totalExpense: string;
+  netSavings: string;
+  loansTitle: string;
+  loansSub: string;
+  net: string;
+  lent: string;
+  borrowed: string;
+  settled: string;
+  noLoans: string;
+  toggleSettled: string;
+  addNew: string;
+  transaction: string;
+  debtLoan: string;
+  iLent: string;
+  iBorrowed: string;
+  amount: string;
+  category: string;
+  pick: string;
+  account: string;
+  date: string;
+  noteOptional: string;
+  note: string;
+  person: string;
+  name: string;
+  save: string;
+  incomeAdded: string;
+  expenseAdded: string;
+  saved: string;
+  enterValidAmount: string;
+  pickCategory: string;
+  enterName: string;
+  cats: Record<string, string>;
+};
+
+const dict: Record<Lang, Strings> = {
   en: {
     // App / nav
     appName: "Pocket",
