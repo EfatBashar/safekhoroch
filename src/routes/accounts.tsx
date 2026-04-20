@@ -1,0 +1,150 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { formatCurrency, useTransactions } from "@/lib/store";
+import { summary, monthlyBuckets } from "@/lib/calc";
+import { Wallet, Banknote } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
+
+export const Route = createFileRoute("/accounts")({
+  head: () => ({
+    meta: [
+      { title: "Accounts — Pocket" },
+      { name: "description", content: "Cash and bank balances with monthly trends." },
+    ],
+  }),
+  component: AccountsPage,
+});
+
+function AccountsPage() {
+  const txs = useTransactions();
+  const s = summary(txs);
+  const months = monthlyBuckets(txs, 6);
+
+  return (
+    <div className="px-5 pt-8">
+      <h1 className="text-2xl font-bold">Accounts</h1>
+      <p className="text-sm text-muted-foreground">Where your money lives</p>
+
+      <div className="mt-5 space-y-3">
+        <AccountCard
+          tone="cash"
+          icon={<Wallet className="h-5 w-5" />}
+          label="Cash on hand"
+          value={s.cash}
+        />
+        <AccountCard
+          tone="balance"
+          icon={<Banknote className="h-5 w-5" />}
+          label="Bank account"
+          value={s.bank}
+        />
+      </div>
+
+      <section className="mt-6 rounded-2xl border bg-card p-4">
+        <h2 className="text-base font-semibold">Monthly summary</h2>
+        <p className="text-xs text-muted-foreground">Last 6 months</p>
+        <div className="mt-3 h-48 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={months} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+              <XAxis
+                dataKey="label"
+                stroke="var(--color-muted-foreground)"
+                tickLine={false}
+                axisLine={false}
+                fontSize={11}
+              />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--color-card)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: 12,
+                  fontSize: 12,
+                }}
+              />
+              <Bar dataKey="income" fill="var(--color-income)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="expense" fill="var(--color-expense)" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-2xl border bg-card p-4">
+        <h2 className="text-base font-semibold">Financial summary</h2>
+        <dl className="mt-3 space-y-2 text-sm">
+          <Row label="Total income" value={formatCurrency(s.income)} tone="income" />
+          <Row label="Total expense" value={formatCurrency(s.expense)} tone="expense" />
+          <div className="my-2 h-px bg-border" />
+          <Row
+            label="Net savings"
+            value={formatCurrency(s.income - s.expense)}
+            tone={s.income - s.expense >= 0 ? "income" : "expense"}
+            bold
+          />
+        </dl>
+      </section>
+    </div>
+  );
+}
+
+function AccountCard({
+  tone,
+  icon,
+  label,
+  value,
+}: {
+  tone: "cash" | "balance";
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+}) {
+  const cls =
+    tone === "cash"
+      ? "bg-cash text-cash-foreground"
+      : "bg-balance text-balance-foreground";
+  return (
+    <div
+      className={`flex items-center justify-between rounded-2xl p-5 ${cls}`}
+      style={{ boxShadow: "var(--shadow-card)" }}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/20">
+          {icon}
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wider opacity-80">{label}</p>
+          <p className="text-xl font-bold">{formatCurrency(value)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  tone,
+  bold,
+}: {
+  label: string;
+  value: string;
+  tone?: "income" | "expense";
+  bold?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd
+        className={`${bold ? "text-base font-bold" : "font-semibold"} ${tone === "income" ? "text-income" : tone === "expense" ? "text-expense" : ""}`}
+      >
+        {value}
+      </dd>
+    </div>
+  );
+}
