@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { formatCurrency, useTransactions } from "@/lib/store";
 import { summary, monthlyBuckets } from "@/lib/calc";
-import { Wallet, Banknote } from "lucide-react";
+import { Wallet, Landmark } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import {
   ResponsiveContainer,
@@ -15,8 +15,8 @@ import {
 export const Route = createFileRoute("/accounts")({
   head: () => ({
     meta: [
-      { title: "Accounts — Pocket" },
-      { name: "description", content: "Cash and bank balances with monthly trends." },
+      { title: "একাউন্ট — হাত-খরচ" },
+      { name: "description", content: "নগদ ও ব্যাংক ব্যালেন্স ও মাসিক ট্রেন্ড।" },
     ],
   }),
   component: AccountsPage,
@@ -30,11 +30,11 @@ function AccountsPage() {
   const fc = (n: number) => formatCurrency(n, lang);
 
   return (
-    <div className="px-5 pt-8">
-      <h1 className="text-2xl font-bold">{t.accountsTitle}</h1>
-      <p className="text-sm text-muted-foreground">{t.accountsSub}</p>
+    <div className="px-4 pb-4 pt-4">
+      <h1 className="font-display text-xl font-bold">{t.accountsTitle}</h1>
+      <p className="text-xs text-muted-foreground">{t.accountsSub}</p>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-4 space-y-3">
         <AccountCard
           tone="cash"
           icon={<Wallet className="h-5 w-5" />}
@@ -43,14 +43,14 @@ function AccountsPage() {
         />
         <AccountCard
           tone="balance"
-          icon={<Banknote className="h-5 w-5" />}
+          icon={<Landmark className="h-5 w-5" />}
           label={t.bankAccount}
           value={fc(s.bank)}
         />
       </div>
 
-      <section className="mt-6 rounded-2xl border bg-card p-4">
-        <h2 className="text-base font-semibold">{t.monthlySummary}</h2>
+      <section className="mt-5 rounded-2xl bg-card p-4 shadow-sm">
+        <h2 className="font-display text-base font-bold">{t.monthlySummary}</h2>
         <p className="text-xs text-muted-foreground">{t.last6Months}</p>
         <div className="mt-3 h-48 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -78,8 +78,8 @@ function AccountsPage() {
         </div>
       </section>
 
-      <section className="mt-4 rounded-2xl border bg-card p-4">
-        <h2 className="text-base font-semibold">{t.financialSummary}</h2>
+      <section className="mt-3 rounded-2xl bg-card p-4 shadow-sm">
+        <h2 className="font-display text-base font-bold">{t.sec1FinancialSummary}</h2>
         <dl className="mt-3 space-y-2 text-sm">
           <Row label={t.totalIncome} value={fc(s.income)} tone="income" />
           <Row label={t.totalExpense} value={fc(s.expense)} tone="expense" />
@@ -113,7 +113,7 @@ function AccountCard({
       : "bg-balance text-balance-foreground";
   return (
     <div
-      className={`flex items-center justify-between rounded-2xl p-5 ${cls}`}
+      className={`flex items-center justify-between rounded-2xl p-4 ${cls}`}
       style={{ boxShadow: "var(--shadow-card)" }}
     >
       <div className="flex items-center gap-3">
@@ -122,7 +122,7 @@ function AccountCard({
         </div>
         <div>
           <p className="text-xs uppercase tracking-wider opacity-80">{label}</p>
-          <p className="text-xl font-bold">{value}</p>
+          <p className="font-display text-xl font-bold">{value}</p>
         </div>
       </div>
     </div>
