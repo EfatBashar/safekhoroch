@@ -42,6 +42,8 @@
   --color-loan-foreground: var(--loan-foreground);
   --color-debt: var(--debt);
   --color-debt-foreground: var(--debt-foreground);
+  --color-fab: var(--fab);
+  --color-fab-foreground: var(--fab-foreground);
 
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-sans: "Inter", system-ui, sans-serif;
