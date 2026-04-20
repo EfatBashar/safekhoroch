@@ -6,9 +6,9 @@ import { cn } from "@/lib/utils";
 
 const tabs = [
   { to: "/", label: "Home", icon: LayoutDashboard, exact: true },
-  { to: "/transactions", label: "Activity", icon: Receipt },
-  { to: "/accounts", label: "Accounts", icon: Wallet },
-  { to: "/loans", label: "Loans", icon: HandCoins },
+  { to: "/transactions", label: "Activity", icon: Receipt, exact: false },
+  { to: "/accounts", label: "Accounts", icon: Wallet, exact: false },
+  { to: "/loans", label: "Loans", icon: HandCoins, exact: false },
 ] as const;
 
 export function AppShell() {
