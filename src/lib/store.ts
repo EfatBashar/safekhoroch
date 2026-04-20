@@ -77,7 +77,13 @@ export function useLoans() {
   return useHydrated(store.getLoans, [] as Loan[]);
 }
 
-export function formatCurrency(n: number) {
+export function formatCurrency(n: number, lang: "en" | "bn" = "en") {
+  if (lang === "bn") {
+    const formatted = new Intl.NumberFormat("bn-BD", {
+      maximumFractionDigits: 0,
+    }).format(Math.abs(n));
+    return `৳${formatted}`;
+  }
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
