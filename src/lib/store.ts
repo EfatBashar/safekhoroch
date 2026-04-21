@@ -4,13 +4,32 @@ import type { Loan, Transaction } from "./types";
 const TX_KEY = "etracker.transactions.v1";
 const LOAN_KEY = "etracker.loans.v1";
 
+// Cached snapshots — useSyncExternalStore requires stable references between
+// reads, otherwise it triggers an infinite re-render loop (React error #185).
+const cache: Record<string, unknown> = {};
+const EMPTY_TX: Transaction[] = [];
+const EMPTY_LOAN: Loan[] = [];
+
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
+  if (key in cache) return cache[key] as T;
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    const value = raw ? (JSON.parse(raw) as T) : fallback;
+    cache[key] = value;
+    return value;
   } catch {
+    cache[key] = fallback;
     return fallback;
+  }
+}
+
+function write(key: string, value: unknown) {
+  cache[key] = value;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* ignore */
   }
 }
 
@@ -21,36 +40,36 @@ function emit() {
 
 export const store = {
   getTransactions(): Transaction[] {
-    return read<Transaction[]>(TX_KEY, []);
+    return read<Transaction[]>(TX_KEY, EMPTY_TX);
   },
   getLoans(): Loan[] {
-    return read<Loan[]>(LOAN_KEY, []);
+    return read<Loan[]>(LOAN_KEY, EMPTY_LOAN);
   },
   addTransaction(tx: Transaction) {
     const all = [tx, ...store.getTransactions()];
-    localStorage.setItem(TX_KEY, JSON.stringify(all));
+    write(TX_KEY, all);
     emit();
   },
   deleteTransaction(id: string) {
     const all = store.getTransactions().filter((t) => t.id !== id);
-    localStorage.setItem(TX_KEY, JSON.stringify(all));
+    write(TX_KEY, all);
     emit();
   },
   addLoan(loan: Loan) {
     const all = [loan, ...store.getLoans()];
-    localStorage.setItem(LOAN_KEY, JSON.stringify(all));
+    write(LOAN_KEY, all);
     emit();
   },
   toggleLoan(id: string) {
     const all = store.getLoans().map((l) =>
       l.id === id ? { ...l, settled: !l.settled } : l,
     );
-    localStorage.setItem(LOAN_KEY, JSON.stringify(all));
+    write(LOAN_KEY, all);
     emit();
   },
   deleteLoan(id: string) {
     const all = store.getLoans().filter((l) => l.id !== id);
-    localStorage.setItem(LOAN_KEY, JSON.stringify(all));
+    write(LOAN_KEY, all);
     emit();
   },
   subscribe(l: () => void) {
