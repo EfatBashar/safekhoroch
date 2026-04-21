@@ -1,5 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useT } from "@/lib/i18n";
+import { useTx } from "@/lib/i18nExtra";
+import { toast } from "sonner";
 import {
   Award,
   Download,
