@@ -12,9 +12,20 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SavingsRouteImport } from './routes/savings'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as ProRouteImport } from './routes/pro'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as MedicineRouteImport } from './routes/medicine'
+import { Route as MarketRouteImport } from './routes/market'
 import { Route as LoansRouteImport } from './routes/loans'
+import { Route as InvestmentRouteImport } from './routes/investment'
+import { Route as FamilyRouteImport } from './routes/family'
+import { Route as DpsRouteImport } from './routes/dps'
+import { Route as BudgetRouteImport } from './routes/budget'
+import { Route as BillsRouteImport } from './routes/bills'
 import { Route as BakirRouteImport } from './routes/bakir'
+import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as AccountsRouteImport } from './routes/accounts'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -33,9 +44,34 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SavingsRoute = SavingsRouteImport.update({
+  id: '/savings',
+  path: '/savings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProRoute = ProRouteImport.update({
   id: '/pro',
   path: '/pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicineRoute = MedicineRouteImport.update({
+  id: '/medicine',
+  path: '/medicine',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketRoute = MarketRouteImport.update({
+  id: '/market',
+  path: '/market',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoansRoute = LoansRouteImport.update({
@@ -43,9 +79,39 @@ const LoansRoute = LoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvestmentRoute = InvestmentRouteImport.update({
+  id: '/investment',
+  path: '/investment',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FamilyRoute = FamilyRouteImport.update({
+  id: '/family',
+  path: '/family',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DpsRoute = DpsRouteImport.update({
+  id: '/dps',
+  path: '/dps',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetRoute = BudgetRouteImport.update({
+  id: '/budget',
+  path: '/budget',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillsRoute = BillsRouteImport.update({
+  id: '/bills',
+  path: '/bills',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BakirRoute = BakirRouteImport.update({
   id: '/bakir',
   path: '/bakir',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssetsRoute = AssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountsRoute = AccountsRouteImport.update({
@@ -62,9 +128,20 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/assets': typeof AssetsRoute
   '/bakir': typeof BakirRoute
+  '/bills': typeof BillsRoute
+  '/budget': typeof BudgetRoute
+  '/dps': typeof DpsRoute
+  '/family': typeof FamilyRoute
+  '/investment': typeof InvestmentRoute
   '/loans': typeof LoansRoute
+  '/market': typeof MarketRoute
+  '/medicine': typeof MedicineRoute
+  '/notifications': typeof NotificationsRoute
   '/pro': typeof ProRoute
+  '/report': typeof ReportRoute
+  '/savings': typeof SavingsRoute
   '/settings': typeof SettingsRoute
   '/tasks': typeof TasksRoute
   '/transactions': typeof TransactionsRoute
@@ -72,9 +149,20 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/assets': typeof AssetsRoute
   '/bakir': typeof BakirRoute
+  '/bills': typeof BillsRoute
+  '/budget': typeof BudgetRoute
+  '/dps': typeof DpsRoute
+  '/family': typeof FamilyRoute
+  '/investment': typeof InvestmentRoute
   '/loans': typeof LoansRoute
+  '/market': typeof MarketRoute
+  '/medicine': typeof MedicineRoute
+  '/notifications': typeof NotificationsRoute
   '/pro': typeof ProRoute
+  '/report': typeof ReportRoute
+  '/savings': typeof SavingsRoute
   '/settings': typeof SettingsRoute
   '/tasks': typeof TasksRoute
   '/transactions': typeof TransactionsRoute
@@ -83,9 +171,20 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/assets': typeof AssetsRoute
   '/bakir': typeof BakirRoute
+  '/bills': typeof BillsRoute
+  '/budget': typeof BudgetRoute
+  '/dps': typeof DpsRoute
+  '/family': typeof FamilyRoute
+  '/investment': typeof InvestmentRoute
   '/loans': typeof LoansRoute
+  '/market': typeof MarketRoute
+  '/medicine': typeof MedicineRoute
+  '/notifications': typeof NotificationsRoute
   '/pro': typeof ProRoute
+  '/report': typeof ReportRoute
+  '/savings': typeof SavingsRoute
   '/settings': typeof SettingsRoute
   '/tasks': typeof TasksRoute
   '/transactions': typeof TransactionsRoute
@@ -95,9 +194,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accounts'
+    | '/assets'
     | '/bakir'
+    | '/bills'
+    | '/budget'
+    | '/dps'
+    | '/family'
+    | '/investment'
     | '/loans'
+    | '/market'
+    | '/medicine'
+    | '/notifications'
     | '/pro'
+    | '/report'
+    | '/savings'
     | '/settings'
     | '/tasks'
     | '/transactions'
@@ -105,9 +215,20 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accounts'
+    | '/assets'
     | '/bakir'
+    | '/bills'
+    | '/budget'
+    | '/dps'
+    | '/family'
+    | '/investment'
     | '/loans'
+    | '/market'
+    | '/medicine'
+    | '/notifications'
     | '/pro'
+    | '/report'
+    | '/savings'
     | '/settings'
     | '/tasks'
     | '/transactions'
@@ -115,9 +236,20 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accounts'
+    | '/assets'
     | '/bakir'
+    | '/bills'
+    | '/budget'
+    | '/dps'
+    | '/family'
+    | '/investment'
     | '/loans'
+    | '/market'
+    | '/medicine'
+    | '/notifications'
     | '/pro'
+    | '/report'
+    | '/savings'
     | '/settings'
     | '/tasks'
     | '/transactions'
@@ -126,9 +258,20 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountsRoute: typeof AccountsRoute
+  AssetsRoute: typeof AssetsRoute
   BakirRoute: typeof BakirRoute
+  BillsRoute: typeof BillsRoute
+  BudgetRoute: typeof BudgetRoute
+  DpsRoute: typeof DpsRoute
+  FamilyRoute: typeof FamilyRoute
+  InvestmentRoute: typeof InvestmentRoute
   LoansRoute: typeof LoansRoute
+  MarketRoute: typeof MarketRoute
+  MedicineRoute: typeof MedicineRoute
+  NotificationsRoute: typeof NotificationsRoute
   ProRoute: typeof ProRoute
+  ReportRoute: typeof ReportRoute
+  SavingsRoute: typeof SavingsRoute
   SettingsRoute: typeof SettingsRoute
   TasksRoute: typeof TasksRoute
   TransactionsRoute: typeof TransactionsRoute
@@ -157,11 +300,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/savings': {
+      id: '/savings'
+      path: '/savings'
+      fullPath: '/savings'
+      preLoaderRoute: typeof SavingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pro': {
       id: '/pro'
       path: '/pro'
       fullPath: '/pro'
       preLoaderRoute: typeof ProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medicine': {
+      id: '/medicine'
+      path: '/medicine'
+      fullPath: '/medicine'
+      preLoaderRoute: typeof MedicineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/market': {
+      id: '/market'
+      path: '/market'
+      fullPath: '/market'
+      preLoaderRoute: typeof MarketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/loans': {
@@ -171,11 +349,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoansRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/investment': {
+      id: '/investment'
+      path: '/investment'
+      fullPath: '/investment'
+      preLoaderRoute: typeof InvestmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/family': {
+      id: '/family'
+      path: '/family'
+      fullPath: '/family'
+      preLoaderRoute: typeof FamilyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dps': {
+      id: '/dps'
+      path: '/dps'
+      fullPath: '/dps'
+      preLoaderRoute: typeof DpsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget': {
+      id: '/budget'
+      path: '/budget'
+      fullPath: '/budget'
+      preLoaderRoute: typeof BudgetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bills': {
+      id: '/bills'
+      path: '/bills'
+      fullPath: '/bills'
+      preLoaderRoute: typeof BillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/bakir': {
       id: '/bakir'
       path: '/bakir'
       fullPath: '/bakir'
       preLoaderRoute: typeof BakirRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assets': {
+      id: '/assets'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AssetsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accounts': {
@@ -198,9 +418,20 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountsRoute: AccountsRoute,
+  AssetsRoute: AssetsRoute,
   BakirRoute: BakirRoute,
+  BillsRoute: BillsRoute,
+  BudgetRoute: BudgetRoute,
+  DpsRoute: DpsRoute,
+  FamilyRoute: FamilyRoute,
+  InvestmentRoute: InvestmentRoute,
   LoansRoute: LoansRoute,
+  MarketRoute: MarketRoute,
+  MedicineRoute: MedicineRoute,
+  NotificationsRoute: NotificationsRoute,
   ProRoute: ProRoute,
+  ReportRoute: ReportRoute,
+  SavingsRoute: SavingsRoute,
   SettingsRoute: SettingsRoute,
   TasksRoute: TasksRoute,
   TransactionsRoute: TransactionsRoute,
@@ -208,3 +439,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

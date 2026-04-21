@@ -93,6 +93,7 @@ function AppShellInner() {
               {lang === "bn" ? "EN" : "বাং"}
             </button>
             <button
+              onClick={() => navigate({ to: "/notifications" })}
               aria-label={t.notifications}
               className="flex h-10 w-10 items-center justify-center rounded-lg active:bg-white/10"
             >
@@ -189,43 +190,43 @@ function SideDrawer({
       label: t.drawerFinancialMgmt,
       items: [
         { icon: Wallet, label: t.featTransactions, to: "/transactions", color: "text-blue-600" },
-        { icon: TrendingUp, label: t.drawerDailyCashFlow, to: "/transactions", color: "text-income" },
+        { icon: TrendingUp, label: t.drawerDailyCashFlow, to: "/report", color: "text-income" },
         { icon: Landmark, label: t.featAccounts, to: "/accounts", color: "text-amber-600" },
         { icon: BookMarked, label: t.featLedger, to: "/bakir", color: "text-purple-600" },
         { icon: Handshake, label: t.featDebt, to: "/loans", color: "text-teal-600" },
-        { icon: WalletCards, label: t.featSavings, to: "/pro", color: "text-emerald-600" },
-        { icon: PieIcon, label: t.featBudget, to: "/pro", color: "text-indigo-600" },
+        { icon: WalletCards, label: t.featSavings, to: "/savings", color: "text-emerald-600" },
+        { icon: PieIcon, label: t.featBudget, to: "/budget", color: "text-indigo-600" },
       ],
     },
     {
       label: t.drawerLoanInvest,
       items: [
         { icon: CreditCard, label: t.featLoan, to: "/loans", color: "text-rose-500" },
-        { icon: PiggyBank, label: t.featDPS, to: "/pro", color: "text-amber-500" },
-        { icon: TrendingUp, label: t.drawerInvestment, to: "/pro", color: "text-income" },
-        { icon: Gem, label: t.drawerAssetVault, to: "/pro", color: "text-orange-500" },
+        { icon: PiggyBank, label: t.featDPS, to: "/dps", color: "text-amber-500" },
+        { icon: TrendingUp, label: t.drawerInvestment, to: "/investment", color: "text-income" },
+        { icon: Gem, label: t.drawerAssetVault, to: "/assets", color: "text-orange-500" },
       ],
     },
     {
       label: t.drawerLifestyle,
       items: [
-        { icon: ShoppingBasket, label: t.toolMarket, to: "/pro", color: "text-amber-700" },
-        { icon: Pill, label: t.toolMedicine, to: "/pro", color: "text-rose-500" },
-        { icon: ReceiptText, label: t.drawerBillReminder, to: "/pro", color: "text-orange-600" },
+        { icon: ShoppingBasket, label: t.toolMarket, to: "/market", color: "text-amber-700" },
+        { icon: Pill, label: t.toolMedicine, to: "/medicine", color: "text-rose-500" },
+        { icon: ReceiptText, label: t.drawerBillReminder, to: "/bills", color: "text-orange-600" },
         { icon: CheckCircle2, label: t.featTasks, to: "/tasks", color: "text-teal-500" },
       ],
     },
     {
       label: t.drawerReports,
       items: [
-        { icon: PieIcon, label: t.toolAnalytics, to: "/accounts", color: "text-purple-600" },
-        { icon: ReceiptText, label: t.toolReport, to: "/accounts", color: "text-slate-600" },
+        { icon: PieIcon, label: t.toolAnalytics, to: "/report", color: "text-purple-600" },
+        { icon: ReceiptText, label: t.toolReport, to: "/report", color: "text-slate-600" },
       ],
     },
     {
       label: t.drawerFamily,
       items: [
-        { icon: Users2, label: t.drawerFamily2, to: "/pro", color: "text-teal-600" },
+        { icon: Users2, label: t.drawerFamily2, to: "/family", color: "text-teal-600" },
       ],
     },
     {
