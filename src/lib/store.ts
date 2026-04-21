@@ -40,36 +40,36 @@ function emit() {
 
 export const store = {
   getTransactions(): Transaction[] {
-    return read<Transaction[]>(TX_KEY, []);
+    return read<Transaction[]>(TX_KEY, EMPTY_TX);
   },
   getLoans(): Loan[] {
-    return read<Loan[]>(LOAN_KEY, []);
+    return read<Loan[]>(LOAN_KEY, EMPTY_LOAN);
   },
   addTransaction(tx: Transaction) {
     const all = [tx, ...store.getTransactions()];
-    localStorage.setItem(TX_KEY, JSON.stringify(all));
+    write(TX_KEY, all);
     emit();
   },
   deleteTransaction(id: string) {
     const all = store.getTransactions().filter((t) => t.id !== id);
-    localStorage.setItem(TX_KEY, JSON.stringify(all));
+    write(TX_KEY, all);
     emit();
   },
   addLoan(loan: Loan) {
     const all = [loan, ...store.getLoans()];
-    localStorage.setItem(LOAN_KEY, JSON.stringify(all));
+    write(LOAN_KEY, all);
     emit();
   },
   toggleLoan(id: string) {
     const all = store.getLoans().map((l) =>
       l.id === id ? { ...l, settled: !l.settled } : l,
     );
-    localStorage.setItem(LOAN_KEY, JSON.stringify(all));
+    write(LOAN_KEY, all);
     emit();
   },
   deleteLoan(id: string) {
     const all = store.getLoans().filter((l) => l.id !== id);
-    localStorage.setItem(LOAN_KEY, JSON.stringify(all));
+    write(LOAN_KEY, all);
     emit();
   },
   subscribe(l: () => void) {
