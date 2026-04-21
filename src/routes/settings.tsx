@@ -27,7 +27,43 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPage() {
   const { t } = useT();
+  const x = useTx();
   const navigate = useNavigate();
+
+  const exportData = () => {
+    try {
+      const all: Record<string, unknown> = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("etracker.")) {
+          try {
+            all[k] = JSON.parse(localStorage.getItem(k) || "null");
+          } catch {
+            all[k] = localStorage.getItem(k);
+          }
+        }
+      }
+      const blob = new Blob([JSON.stringify(all, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `hat-khoroch-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(x.exportDone);
+    } catch {
+      toast.error("Export failed");
+    }
+  };
+
+  const deleteAll = () => {
+    if (!confirm(x.confirmDelete)) return;
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith("etracker."))
+      .forEach((k) => localStorage.removeItem(k));
+    toast.success(x.deletedAll);
+    setTimeout(() => location.reload(), 600);
+  };
 
   return (
     <div className="pb-4">
@@ -48,7 +84,6 @@ function SettingsPage() {
         </div>
       </div>
 
-      {/* Account section */}
       <Section title={t.account_label}>
         <Row
           icon={<Award className="h-5 w-5 text-amber-500" />}
@@ -60,18 +95,29 @@ function SettingsPage() {
           icon={<Download className="h-5 w-5 text-income" />}
           title={t.dataExport}
           subtitle={t.dataExportSub}
+          onClick={exportData}
         />
         <Row
           icon={<RefreshCw className="h-5 w-5 text-primary" />}
           title={t.cloudSync}
           subtitle={t.cloudSyncSub}
+          onClick={() => toast.info(t.comingSoon)}
         />
-        <Row icon={<Shield className="h-5 w-5 text-teal-600" />} title={t.privacyPolicy} />
+        <Row
+          icon={<Shield className="h-5 w-5 text-teal-600" />}
+          title={t.privacyPolicy}
+          onClick={() => toast.info(t.comingSoon)}
+        />
         <Row
           icon={<KeyRound className="h-5 w-5 text-blue-600" />}
           title={t.changePassword}
+          onClick={() => toast.info(t.comingSoon)}
         />
-        <Row icon={<LogOut className="h-5 w-5 text-amber-600" />} title={t.signOut} />
+        <Row
+          icon={<LogOut className="h-5 w-5 text-amber-600" />}
+          title={t.signOut}
+          onClick={() => toast.success(x.signedOut)}
+        />
       </Section>
 
       <Section title={t.helpContact}>
@@ -79,11 +125,13 @@ function SettingsPage() {
           icon={<MessageCircle className="h-5 w-5 text-income" />}
           title={t.whatsappSupport}
           subtitle="01685253524"
+          onClick={() => window.open("https://wa.me/8801685253524", "_blank")}
         />
         <Row
           icon={<Mail className="h-5 w-5 text-blue-600" />}
           title={t.emailSupport}
           subtitle="support@hatkhoroch.com"
+          onClick={() => (window.location.href = "mailto:support@hatkhoroch.com")}
         />
       </Section>
 
@@ -93,6 +141,7 @@ function SettingsPage() {
           title={t.deleteAccount}
           subtitle={t.deleteAccountSub}
           danger
+          onClick={deleteAll}
         />
       </Section>
 
