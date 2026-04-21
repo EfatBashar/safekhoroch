@@ -136,13 +136,13 @@ function Dashboard() {
           icon={<PieChart className="h-7 w-7" />}
           label={t.featBudget}
           color="indigo"
-          onClick={() => navigate({ to: "/pro" })}
+          onClick={() => navigate({ to: "/budget" })}
         />
         <FeatTile
           icon={<WalletCards className="h-7 w-7" />}
           label={t.featSavings}
           color="rose"
-          onClick={() => navigate({ to: "/pro" })}
+          onClick={() => navigate({ to: "/savings" })}
         />
         <FeatTile
           icon={<CreditCard className="h-7 w-7" />}
@@ -154,7 +154,7 @@ function Dashboard() {
           icon={<PiggyBank className="h-7 w-7" />}
           label={t.featDPS}
           color="yellow"
-          onClick={() => navigate({ to: "/pro" })}
+          onClick={() => navigate({ to: "/dps" })}
         />
         <FeatTile
           icon={<CheckCircle2 className="h-7 w-7" />}
@@ -242,22 +242,22 @@ function Dashboard() {
         <ToolTile
           icon={<ShoppingBasket className="h-6 w-6 text-amber-700" />}
           label={t.toolMarket}
-          onClick={() => navigate({ to: "/pro" })}
+          onClick={() => navigate({ to: "/market" })}
         />
         <ToolTile
           icon={<Pill className="h-6 w-6 text-rose-500" />}
           label={t.toolMedicine}
-          onClick={() => navigate({ to: "/pro" })}
+          onClick={() => navigate({ to: "/medicine" })}
         />
         <ToolTile
           icon={<ReceiptText className="h-6 w-6 text-orange-500" />}
           label={t.toolBills}
-          onClick={() => navigate({ to: "/pro" })}
+          onClick={() => navigate({ to: "/bills" })}
         />
         <ToolTile
           icon={<BarChart3 className="h-6 w-6 text-purple-600" />}
           label={t.toolAnalytics}
-          onClick={() => navigate({ to: "/accounts" })}
+          onClick={() => navigate({ to: "/report" })}
         />
         <ToolTile
           icon={<Store className="h-6 w-6 text-emerald-600" />}
@@ -267,7 +267,7 @@ function Dashboard() {
         <ToolTile
           icon={<FileText className="h-6 w-6 text-slate-600" />}
           label={t.toolReport}
-          onClick={() => navigate({ to: "/accounts" })}
+          onClick={() => navigate({ to: "/report" })}
         />
         <ToolTile
           icon={<Award className="h-6 w-6 text-amber-500" />}
