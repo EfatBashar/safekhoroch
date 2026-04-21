@@ -4,13 +4,32 @@ import type { Loan, Transaction } from "./types";
 const TX_KEY = "etracker.transactions.v1";
 const LOAN_KEY = "etracker.loans.v1";
 
+// Cached snapshots — useSyncExternalStore requires stable references between
+// reads, otherwise it triggers an infinite re-render loop (React error #185).
+const cache: Record<string, unknown> = {};
+const EMPTY_TX: Transaction[] = [];
+const EMPTY_LOAN: Loan[] = [];
+
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
+  if (key in cache) return cache[key] as T;
   try {
     const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    const value = raw ? (JSON.parse(raw) as T) : fallback;
+    cache[key] = value;
+    return value;
   } catch {
+    cache[key] = fallback;
     return fallback;
+  }
+}
+
+function write(key: string, value: unknown) {
+  cache[key] = value;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* ignore */
   }
 }
 
