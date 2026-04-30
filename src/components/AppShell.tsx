@@ -121,15 +121,19 @@ function AppShellInner() {
         <Outlet />
       </main>
 
-      {/* FAB */}
-      <button
-        aria-label={t.add}
-        onClick={() => setAddOpen(true)}
-        className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-fab text-fab-foreground transition-transform active:scale-95"
-        style={{ boxShadow: "var(--shadow-fab)" }}
-      >
-        <Plus className="h-7 w-7" strokeWidth={2.5} />
-      </button>
+      {/* FAB — hide on pages that have their own FAB */}
+      {!["/budget", "/savings", "/dps", "/bills", "/investment", "/assets", "/bakir"].some(
+        (p) => location.pathname === p || location.pathname.startsWith(p + "/"),
+      ) && (
+        <button
+          aria-label={t.add}
+          onClick={() => setAddOpen(true)}
+          className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-fab text-fab-foreground transition-transform active:scale-95"
+          style={{ boxShadow: "var(--shadow-fab)" }}
+        >
+          <Plus className="h-7 w-7" strokeWidth={2.5} />
+        </button>
+      )}
 
       {/* Bottom nav (5 tabs) */}
       <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-border bg-card/95 backdrop-blur">
