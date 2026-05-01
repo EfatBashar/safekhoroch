@@ -27,15 +27,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
       setSession(s);
       if (s?.user) {
-        setTimeout(() => checkAdmin(s.user.id), 0);
+        setLoading(true);
+        setTimeout(() => {
+          checkAdmin(s.user.id).finally(() => setLoading(false));
+        }, 0);
       } else {
         setIsAdmin(false);
+        setLoading(false);
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
-      if (data.session?.user) checkAdmin(data.session.user.id);
+      if (data.session?.user) await checkAdmin(data.session.user.id);
       setLoading(false);
     });
 
@@ -43,13 +47,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkAdmin = async (uid: string) => {
-    const { data, error } = await supabase.rpc("has_role", {
-      _user_id: uid,
-      _role: "admin",
-    });
-    if (error) console.error("[auth] checkAdmin error:", error);
-    console.log("[auth] checkAdmin uid=", uid, "isAdmin=", data);
-    setIsAdmin(!!data);
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: uid,
+        _role: "admin",
+      });
+
+      if (!error) {
+        setIsAdmin(!!data);
+        return;
+      }
+
+      if (attempt === 3) {
+        console.error("[auth] checkAdmin error:", error);
+        setIsAdmin(false);
+        return;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    }
   };
 
   return (
