@@ -238,7 +238,7 @@ function SideDrawer({
     },
     {
       items: [
-        { icon: Award, label: t.drawerProUpgrade, to: "/pro", color: "text-amber-500" },
+        
         { icon: SettingsIcon, label: t.settings, to: "/settings", color: "text-slate-500" },
         { icon: LogOut, label: t.drawerLogout, to: "/", color: "text-rose-500" },
       ],
