@@ -177,6 +177,7 @@ function SideDrawer({
   onOpenChange: (v: boolean) => void;
 }) {
   const { t } = useT();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const go = (to: string) => {
@@ -236,6 +237,16 @@ function SideDrawer({
         { icon: Users2, label: t.drawerFamily2, to: "/family", color: "text-teal-600" },
       ],
     },
+    ...(isAdmin
+      ? [
+          {
+            label: "অ্যাডমিন",
+            items: [
+              { icon: ShieldCheck, label: "অ্যাডমিন প্যানেল", to: "/admin", color: "text-primary" },
+            ],
+          },
+        ]
+      : []),
     {
       items: [
         
