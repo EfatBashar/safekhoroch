@@ -33,13 +33,16 @@ import {
 import { AddSheet } from "./AddSheet";
 import { cn } from "@/lib/utils";
 import { LanguageProvider, useT } from "@/lib/i18n";
+import { AuthProvider } from "@/lib/auth";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export function AppShell() {
   return (
-    <LanguageProvider>
-      <AppShellInner />
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <AppShellInner />
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 
