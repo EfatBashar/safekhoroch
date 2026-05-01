@@ -70,7 +70,7 @@ function AppShellInner() {
     if (location.pathname.startsWith("/tasks")) return t.tasksTitle;
     if (location.pathname.startsWith("/bakir")) return t.bakirTitle;
     if (location.pathname.startsWith("/settings")) return t.settingsTitle;
-    if (location.pathname.startsWith("/pro")) return t.proTitle;
+    
     return t.appName;
   })();
 
