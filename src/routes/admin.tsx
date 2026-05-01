@@ -52,7 +52,7 @@ function AdminPage() {
 
   return (
     <div className="pb-8">
-      <PageHeader title="অ্যাডমিন প্যানেল" subtitle="অ্যাপ পরিচালনা" />
+      <PageHeader icon={Shield} title="অ্যাডমিন প্যানেল" subtitle="অ্যাপ পরিচালনা" />
 
       <div className="sticky top-[60px] z-10 flex gap-1 border-b border-border bg-background px-3 py-2">
         <TabBtn active={tab === "stats"} onClick={() => setTab("stats")} icon={BarChart3} label="স্ট্যাটস" />
