@@ -25,124 +25,40 @@ import { Route as DpsRouteImport } from './routes/dps'
 import { Route as BudgetRouteImport } from './routes/budget'
 import { Route as BillsRouteImport } from './routes/bills'
 import { Route as BakirRouteImport } from './routes/bakir'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AssetsRouteImport } from './routes/assets'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountsRouteImport } from './routes/accounts'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
-const TransactionsRoute = TransactionsRouteImport.update({
-  id: '/transactions',
-  path: '/transactions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SavingsRoute = SavingsRouteImport.update({
-  id: '/savings',
-  path: '/savings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportRoute = ReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProRoute = ProRouteImport.update({
-  id: '/pro',
-  path: '/pro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MedicineRoute = MedicineRouteImport.update({
-  id: '/medicine',
-  path: '/medicine',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MarketRoute = MarketRouteImport.update({
-  id: '/market',
-  path: '/market',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoansRoute = LoansRouteImport.update({
-  id: '/loans',
-  path: '/loans',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InvestmentRoute = InvestmentRouteImport.update({
-  id: '/investment',
-  path: '/investment',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FamilyRoute = FamilyRouteImport.update({
-  id: '/family',
-  path: '/family',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DpsRoute = DpsRouteImport.update({
-  id: '/dps',
-  path: '/dps',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BudgetRoute = BudgetRouteImport.update({
-  id: '/budget',
-  path: '/budget',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BillsRoute = BillsRouteImport.update({
-  id: '/bills',
-  path: '/bills',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BakirRoute = BakirRouteImport.update({
-  id: '/bakir',
-  path: '/bakir',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssetsRoute = AssetsRouteImport.update({
-  id: '/assets',
-  path: '/assets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountsRoute = AccountsRouteImport.update({
-  id: '/accounts',
-  path: '/accounts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const TransactionsRoute = TransactionsRouteImport.update({ id: '/transactions', path: '/transactions', getParentRoute: () => rootRouteImport } as any)
+const TasksRoute = TasksRouteImport.update({ id: '/tasks', path: '/tasks', getParentRoute: () => rootRouteImport } as any)
+const SettingsRoute = SettingsRouteImport.update({ id: '/settings', path: '/settings', getParentRoute: () => rootRouteImport } as any)
+const SavingsRoute = SavingsRouteImport.update({ id: '/savings', path: '/savings', getParentRoute: () => rootRouteImport } as any)
+const ReportRoute = ReportRouteImport.update({ id: '/report', path: '/report', getParentRoute: () => rootRouteImport } as any)
+const ProRoute = ProRouteImport.update({ id: '/pro', path: '/pro', getParentRoute: () => rootRouteImport } as any)
+const NotificationsRoute = NotificationsRouteImport.update({ id: '/notifications', path: '/notifications', getParentRoute: () => rootRouteImport } as any)
+const MedicineRoute = MedicineRouteImport.update({ id: '/medicine', path: '/medicine', getParentRoute: () => rootRouteImport } as any)
+const MarketRoute = MarketRouteImport.update({ id: '/market', path: '/market', getParentRoute: () => rootRouteImport } as any)
+const LoansRoute = LoansRouteImport.update({ id: '/loans', path: '/loans', getParentRoute: () => rootRouteImport } as any)
+const InvestmentRoute = InvestmentRouteImport.update({ id: '/investment', path: '/investment', getParentRoute: () => rootRouteImport } as any)
+const FamilyRoute = FamilyRouteImport.update({ id: '/family', path: '/family', getParentRoute: () => rootRouteImport } as any)
+const DpsRoute = DpsRouteImport.update({ id: '/dps', path: '/dps', getParentRoute: () => rootRouteImport } as any)
+const BudgetRoute = BudgetRouteImport.update({ id: '/budget', path: '/budget', getParentRoute: () => rootRouteImport } as any)
+const BillsRoute = BillsRouteImport.update({ id: '/bills', path: '/bills', getParentRoute: () => rootRouteImport } as any)
+const BakirRoute = BakirRouteImport.update({ id: '/bakir', path: '/bakir', getParentRoute: () => rootRouteImport } as any)
+const AssetsRoute = AssetsRouteImport.update({ id: '/assets', path: '/assets', getParentRoute: () => rootRouteImport } as any)
+const AccountsRoute = AccountsRouteImport.update({ id: '/accounts', path: '/accounts', getParentRoute: () => rootRouteImport } as any)
+const AuthRoute = AuthRouteImport.update({ id: '/auth', path: '/auth', getParentRoute: () => rootRouteImport } as any)
+const AdminRoute = AdminRouteImport.update({ id: '/admin', path: '/admin', getParentRoute: () => rootRouteImport } as any)
+const IndexRoute = IndexRouteImport.update({ id: '/', path: '/', getParentRoute: () => rootRouteImport } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
   '/admin': typeof AdminRoute
-  '/assets': typeof AssetsRoute
   '/auth': typeof AuthRoute
+  '/accounts': typeof AccountsRoute
+  '/assets': typeof AssetsRoute
   '/bakir': typeof BakirRoute
   '/bills': typeof BillsRoute
   '/budget': typeof BudgetRoute
@@ -160,36 +76,14 @@ export interface FileRoutesByFullPath {
   '/tasks': typeof TasksRoute
   '/transactions': typeof TransactionsRoute
 }
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
-  '/admin': typeof AdminRoute
-  '/assets': typeof AssetsRoute
-  '/auth': typeof AuthRoute
-  '/bakir': typeof BakirRoute
-  '/bills': typeof BillsRoute
-  '/budget': typeof BudgetRoute
-  '/dps': typeof DpsRoute
-  '/family': typeof FamilyRoute
-  '/investment': typeof InvestmentRoute
-  '/loans': typeof LoansRoute
-  '/market': typeof MarketRoute
-  '/medicine': typeof MedicineRoute
-  '/notifications': typeof NotificationsRoute
-  '/pro': typeof ProRoute
-  '/report': typeof ReportRoute
-  '/savings': typeof SavingsRoute
-  '/settings': typeof SettingsRoute
-  '/tasks': typeof TasksRoute
-  '/transactions': typeof TransactionsRoute
-}
+export interface FileRoutesByTo extends FileRoutesByFullPath {}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
   '/admin': typeof AdminRoute
-  '/assets': typeof AssetsRoute
   '/auth': typeof AuthRoute
+  '/accounts': typeof AccountsRoute
+  '/assets': typeof AssetsRoute
   '/bakir': typeof BakirRoute
   '/bills': typeof BillsRoute
   '/budget': typeof BudgetRoute
@@ -211,10 +105,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/accounts'
     | '/admin'
-    | '/assets'
     | '/auth'
+    | '/accounts'
+    | '/assets'
     | '/bakir'
     | '/bills'
     | '/budget'
@@ -234,10 +128,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/accounts'
     | '/admin'
-    | '/assets'
     | '/auth'
+    | '/accounts'
+    | '/assets'
     | '/bakir'
     | '/bills'
     | '/budget'
@@ -257,10 +151,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/accounts'
     | '/admin'
-    | '/assets'
     | '/auth'
+    | '/accounts'
+    | '/assets'
     | '/bakir'
     | '/bills'
     | '/budget'
@@ -281,10 +175,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccountsRoute: typeof AccountsRoute
   AdminRoute: typeof AdminRoute
-  AssetsRoute: typeof AssetsRoute
   AuthRoute: typeof AuthRoute
+  AccountsRoute: typeof AccountsRoute
+  AssetsRoute: typeof AssetsRoute
   BakirRoute: typeof BakirRoute
   BillsRoute: typeof BillsRoute
   BudgetRoute: typeof BudgetRoute
@@ -305,178 +199,52 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/transactions': {
-      id: '/transactions'
-      path: '/transactions'
-      fullPath: '/transactions'
-      preLoaderRoute: typeof TransactionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tasks': {
-      id: '/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/savings': {
-      id: '/savings'
-      path: '/savings'
-      fullPath: '/savings'
-      preLoaderRoute: typeof SavingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/report': {
-      id: '/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pro': {
-      id: '/pro'
-      path: '/pro'
-      fullPath: '/pro'
-      preLoaderRoute: typeof ProRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/medicine': {
-      id: '/medicine'
-      path: '/medicine'
-      fullPath: '/medicine'
-      preLoaderRoute: typeof MedicineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/market': {
-      id: '/market'
-      path: '/market'
-      fullPath: '/market'
-      preLoaderRoute: typeof MarketRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loans': {
-      id: '/loans'
-      path: '/loans'
-      fullPath: '/loans'
-      preLoaderRoute: typeof LoansRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/investment': {
-      id: '/investment'
-      path: '/investment'
-      fullPath: '/investment'
-      preLoaderRoute: typeof InvestmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/family': {
-      id: '/family'
-      path: '/family'
-      fullPath: '/family'
-      preLoaderRoute: typeof FamilyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dps': {
-      id: '/dps'
-      path: '/dps'
-      fullPath: '/dps'
-      preLoaderRoute: typeof DpsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/budget': {
-      id: '/budget'
-      path: '/budget'
-      fullPath: '/budget'
-      preLoaderRoute: typeof BudgetRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bills': {
-      id: '/bills'
-      path: '/bills'
-      fullPath: '/bills'
-      preLoaderRoute: typeof BillsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/bakir': {
-      id: '/bakir'
-      path: '/bakir'
-      fullPath: '/bakir'
-      preLoaderRoute: typeof BakirRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assets': {
-      id: '/assets'
-      path: '/assets'
-      fullPath: '/assets'
-      preLoaderRoute: typeof AssetsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/accounts': {
-      id: '/accounts'
-      path: '/accounts'
-      fullPath: '/accounts'
-      preLoaderRoute: typeof AccountsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
+    '/transactions': { id: '/transactions'; path: '/transactions'; fullPath: '/transactions'; preLoaderRoute: typeof TransactionsRouteImport; parentRoute: typeof rootRouteImport }
+    '/tasks': { id: '/tasks'; path: '/tasks'; fullPath: '/tasks'; preLoaderRoute: typeof TasksRouteImport; parentRoute: typeof rootRouteImport }
+    '/settings': { id: '/settings'; path: '/settings'; fullPath: '/settings'; preLoaderRoute: typeof SettingsRouteImport; parentRoute: typeof rootRouteImport }
+    '/savings': { id: '/savings'; path: '/savings'; fullPath: '/savings'; preLoaderRoute: typeof SavingsRouteImport; parentRoute: typeof rootRouteImport }
+    '/report': { id: '/report'; path: '/report'; fullPath: '/report'; preLoaderRoute: typeof ReportRouteImport; parentRoute: typeof rootRouteImport }
+    '/pro': { id: '/pro'; path: '/pro'; fullPath: '/pro'; preLoaderRoute: typeof ProRouteImport; parentRoute: typeof rootRouteImport }
+    '/notifications': { id: '/notifications'; path: '/notifications'; fullPath: '/notifications'; preLoaderRoute: typeof NotificationsRouteImport; parentRoute: typeof rootRouteImport }
+    '/medicine': { id: '/medicine'; path: '/medicine'; fullPath: '/medicine'; preLoaderRoute: typeof MedicineRouteImport; parentRoute: typeof rootRouteImport }
+    '/market': { id: '/market'; path: '/market'; fullPath: '/market'; preLoaderRoute: typeof MarketRouteImport; parentRoute: typeof rootRouteImport }
+    '/loans': { id: '/loans'; path: '/loans'; fullPath: '/loans'; preLoaderRoute: typeof LoansRouteImport; parentRoute: typeof rootRouteImport }
+    '/investment': { id: '/investment'; path: '/investment'; fullPath: '/investment'; preLoaderRoute: typeof InvestmentRouteImport; parentRoute: typeof rootRouteImport }
+    '/family': { id: '/family'; path: '/family'; fullPath: '/family'; preLoaderRoute: typeof FamilyRouteImport; parentRoute: typeof rootRouteImport }
+    '/dps': { id: '/dps'; path: '/dps'; fullPath: '/dps'; preLoaderRoute: typeof DpsRouteImport; parentRoute: typeof rootRouteImport }
+    '/budget': { id: '/budget'; path: '/budget'; fullPath: '/budget'; preLoaderRoute: typeof BudgetRouteImport; parentRoute: typeof rootRouteImport }
+    '/bills': { id: '/bills'; path: '/bills'; fullPath: '/bills'; preLoaderRoute: typeof BillsRouteImport; parentRoute: typeof rootRouteImport }
+    '/bakir': { id: '/bakir'; path: '/bakir'; fullPath: '/bakir'; preLoaderRoute: typeof BakirRouteImport; parentRoute: typeof rootRouteImport }
+    '/assets': { id: '/assets'; path: '/assets'; fullPath: '/assets'; preLoaderRoute: typeof AssetsRouteImport; parentRoute: typeof rootRouteImport }
+    '/accounts': { id: '/accounts'; path: '/accounts'; fullPath: '/accounts'; preLoaderRoute: typeof AccountsRouteImport; parentRoute: typeof rootRouteImport }
+    '/auth': { id: '/auth'; path: '/auth'; fullPath: '/auth'; preLoaderRoute: typeof AuthRouteImport; parentRoute: typeof rootRouteImport }
+    '/admin': { id: '/admin'; path: '/admin'; fullPath: '/admin'; preLoaderRoute: typeof AdminRouteImport; parentRoute: typeof rootRouteImport }
+    '/': { id: '/'; path: '/'; fullPath: '/'; preLoaderRoute: typeof IndexRouteImport; parentRoute: typeof rootRouteImport }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AccountsRoute: AccountsRoute,
-  AdminRoute: AdminRoute,
-  AssetsRoute: AssetsRoute,
-  AuthRoute: AuthRoute,
-  BakirRoute: BakirRoute,
-  BillsRoute: BillsRoute,
-  BudgetRoute: BudgetRoute,
-  DpsRoute: DpsRoute,
-  FamilyRoute: FamilyRoute,
-  InvestmentRoute: InvestmentRoute,
-  LoansRoute: LoansRoute,
-  MarketRoute: MarketRoute,
-  MedicineRoute: MedicineRoute,
-  NotificationsRoute: NotificationsRoute,
-  ProRoute: ProRoute,
-  ReportRoute: ReportRoute,
-  SavingsRoute: SavingsRoute,
-  SettingsRoute: SettingsRoute,
-  TasksRoute: TasksRoute,
-  TransactionsRoute: TransactionsRoute,
+  IndexRoute,
+  AdminRoute,
+  AuthRoute,
+  AccountsRoute,
+  AssetsRoute,
+  BakirRoute,
+  BillsRoute,
+  BudgetRoute,
+  DpsRoute,
+  FamilyRoute,
+  InvestmentRoute,
+  LoansRoute,
+  MarketRoute,
+  MedicineRoute,
+  NotificationsRoute,
+  ProRoute,
+  ReportRoute,
+  SavingsRoute,
+  SettingsRoute,
+  TasksRoute,
+  TransactionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
