@@ -26,14 +26,14 @@ import {
   Pill,
   ReceiptText,
   Users2,
-  
+  ShieldCheck,
   LogOut,
   X,
 } from "lucide-react";
 import { AddSheet } from "./AddSheet";
 import { cn } from "@/lib/utils";
 import { LanguageProvider, useT } from "@/lib/i18n";
-import { AuthProvider } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export function AppShell() {
