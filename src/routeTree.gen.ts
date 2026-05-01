@@ -25,7 +25,9 @@ import { Route as DpsRouteImport } from './routes/dps'
 import { Route as BudgetRouteImport } from './routes/budget'
 import { Route as BillsRouteImport } from './routes/bills'
 import { Route as BakirRouteImport } from './routes/bakir'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AssetsRouteImport } from './routes/assets'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountsRouteImport } from './routes/accounts'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -109,9 +111,19 @@ const BakirRoute = BakirRouteImport.update({
   path: '/bakir',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssetsRoute = AssetsRouteImport.update({
   id: '/assets',
   path: '/assets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountsRoute = AccountsRouteImport.update({
@@ -128,7 +140,9 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/admin': typeof AdminRoute
   '/assets': typeof AssetsRoute
+  '/auth': typeof AuthRoute
   '/bakir': typeof BakirRoute
   '/bills': typeof BillsRoute
   '/budget': typeof BudgetRoute
@@ -149,7 +163,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/admin': typeof AdminRoute
   '/assets': typeof AssetsRoute
+  '/auth': typeof AuthRoute
   '/bakir': typeof BakirRoute
   '/bills': typeof BillsRoute
   '/budget': typeof BudgetRoute
@@ -171,7 +187,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/accounts': typeof AccountsRoute
+  '/admin': typeof AdminRoute
   '/assets': typeof AssetsRoute
+  '/auth': typeof AuthRoute
   '/bakir': typeof BakirRoute
   '/bills': typeof BillsRoute
   '/budget': typeof BudgetRoute
@@ -194,7 +212,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/accounts'
+    | '/admin'
     | '/assets'
+    | '/auth'
     | '/bakir'
     | '/bills'
     | '/budget'
@@ -215,7 +235,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/accounts'
+    | '/admin'
     | '/assets'
+    | '/auth'
     | '/bakir'
     | '/bills'
     | '/budget'
@@ -236,7 +258,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/accounts'
+    | '/admin'
     | '/assets'
+    | '/auth'
     | '/bakir'
     | '/bills'
     | '/budget'
@@ -258,7 +282,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountsRoute: typeof AccountsRoute
+  AdminRoute: typeof AdminRoute
   AssetsRoute: typeof AssetsRoute
+  AuthRoute: typeof AuthRoute
   BakirRoute: typeof BakirRoute
   BillsRoute: typeof BillsRoute
   BudgetRoute: typeof BudgetRoute
@@ -391,11 +417,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BakirRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assets': {
       id: '/assets'
       path: '/assets'
       fullPath: '/assets'
       preLoaderRoute: typeof AssetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/accounts': {
@@ -418,7 +458,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountsRoute: AccountsRoute,
+  AdminRoute: AdminRoute,
   AssetsRoute: AssetsRoute,
+  AuthRoute: AuthRoute,
   BakirRoute: BakirRoute,
   BillsRoute: BillsRoute,
   BudgetRoute: BudgetRoute,
@@ -439,12 +481,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
