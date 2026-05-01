@@ -1,31 +1,11 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  LayoutGrid,
-  Receipt,
-  CheckCircle2,
-  Users,
-  Store,
   Plus,
   Menu,
   Bell,
   Settings as SettingsIcon,
   User,
-  LayoutDashboard,
-  Wallet,
-  TrendingUp,
-  Landmark,
-  BookMarked,
-  Handshake,
-  WalletCards,
-  PieChart as PieIcon,
-  CreditCard,
-  PiggyBank,
-  Gem,
-  ShoppingBasket,
-  Pill,
-  ReceiptText,
-  Users2,
   ShieldCheck,
   LogOut,
   X,
@@ -34,14 +14,17 @@ import { AddSheet } from "./AddSheet";
 import { cn } from "@/lib/utils";
 import { LanguageProvider, useT } from "@/lib/i18n";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { AppConfigProvider, useAppConfig, DynIcon } from "@/lib/appConfig";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export function AppShell() {
   return (
     <AuthProvider>
-      <LanguageProvider>
-        <AppShellInner />
-      </LanguageProvider>
+      <AppConfigProvider>
+        <LanguageProvider>
+          <AppShellInner />
+        </LanguageProvider>
+      </AppConfigProvider>
     </AuthProvider>
   );
 }
