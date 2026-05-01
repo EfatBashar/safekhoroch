@@ -120,14 +120,6 @@ function SettingsPage() {
               <LogIn className="h-3.5 w-3.5" /> লগইন / সাইনআপ
             </button>
           )}
-          {user && (
-            <button
-              onClick={() => navigate({ to: "/pro" })}
-              className="mt-3 flex items-center gap-1.5 rounded-full bg-card px-4 py-1.5 text-xs font-semibold shadow-sm"
-            >
-              🔒 {t.freePlan} • {t.upgradePro}
-            </button>
-          )}
         </div>
       </div>
 
