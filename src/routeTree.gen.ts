@@ -14,7 +14,6 @@ import { Route as TasksRouteImport } from './routes/tasks'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SavingsRouteImport } from './routes/savings'
 import { Route as ReportRouteImport } from './routes/report'
-import { Route as ProRouteImport } from './routes/pro'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MedicineRouteImport } from './routes/medicine'
 import { Route as MarketRouteImport } from './routes/market'
@@ -54,11 +53,6 @@ const SavingsRoute = SavingsRouteImport.update({
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProRoute = ProRouteImport.update({
-  id: '/pro',
-  path: '/pro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -153,7 +147,6 @@ export interface FileRoutesByFullPath {
   '/market': typeof MarketRoute
   '/medicine': typeof MedicineRoute
   '/notifications': typeof NotificationsRoute
-  '/pro': typeof ProRoute
   '/report': typeof ReportRoute
   '/savings': typeof SavingsRoute
   '/settings': typeof SettingsRoute
@@ -176,7 +169,6 @@ export interface FileRoutesByTo {
   '/market': typeof MarketRoute
   '/medicine': typeof MedicineRoute
   '/notifications': typeof NotificationsRoute
-  '/pro': typeof ProRoute
   '/report': typeof ReportRoute
   '/savings': typeof SavingsRoute
   '/settings': typeof SettingsRoute
@@ -200,7 +192,6 @@ export interface FileRoutesById {
   '/market': typeof MarketRoute
   '/medicine': typeof MedicineRoute
   '/notifications': typeof NotificationsRoute
-  '/pro': typeof ProRoute
   '/report': typeof ReportRoute
   '/savings': typeof SavingsRoute
   '/settings': typeof SettingsRoute
@@ -225,7 +216,6 @@ export interface FileRouteTypes {
     | '/market'
     | '/medicine'
     | '/notifications'
-    | '/pro'
     | '/report'
     | '/savings'
     | '/settings'
@@ -248,7 +238,6 @@ export interface FileRouteTypes {
     | '/market'
     | '/medicine'
     | '/notifications'
-    | '/pro'
     | '/report'
     | '/savings'
     | '/settings'
@@ -271,7 +260,6 @@ export interface FileRouteTypes {
     | '/market'
     | '/medicine'
     | '/notifications'
-    | '/pro'
     | '/report'
     | '/savings'
     | '/settings'
@@ -295,7 +283,6 @@ export interface RootRouteChildren {
   MarketRoute: typeof MarketRoute
   MedicineRoute: typeof MedicineRoute
   NotificationsRoute: typeof NotificationsRoute
-  ProRoute: typeof ProRoute
   ReportRoute: typeof ReportRoute
   SavingsRoute: typeof SavingsRoute
   SettingsRoute: typeof SettingsRoute
@@ -338,13 +325,6 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pro': {
-      id: '/pro'
-      path: '/pro'
-      fullPath: '/pro'
-      preLoaderRoute: typeof ProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -471,7 +451,6 @@ const rootRouteChildren: RootRouteChildren = {
   MarketRoute: MarketRoute,
   MedicineRoute: MedicineRoute,
   NotificationsRoute: NotificationsRoute,
-  ProRoute: ProRoute,
   ReportRoute: ReportRoute,
   SavingsRoute: SavingsRoute,
   SettingsRoute: SettingsRoute,
@@ -481,3 +460,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

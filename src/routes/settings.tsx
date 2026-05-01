@@ -6,15 +6,12 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Award,
   Download,
   RefreshCw,
   Shield,
   KeyRound,
   LogOut,
   LogIn,
-  MessageCircle,
-  Mail,
   Trash2,
   ChevronRight,
   MessageSquare,
@@ -120,14 +117,6 @@ function SettingsPage() {
               <LogIn className="h-3.5 w-3.5" /> লগইন / সাইনআপ
             </button>
           )}
-          {user && (
-            <button
-              onClick={() => navigate({ to: "/pro" })}
-              className="mt-3 flex items-center gap-1.5 rounded-full bg-card px-4 py-1.5 text-xs font-semibold shadow-sm"
-            >
-              🔒 {t.freePlan} • {t.upgradePro}
-            </button>
-          )}
         </div>
       </div>
 
@@ -143,7 +132,7 @@ function SettingsPage() {
       )}
 
       <Section title={t.account_label}>
-        <Row icon={<Award className="h-5 w-5 text-amber-500" />} title={t.upgradePro} subtitle={t.proSub} onClick={() => navigate({ to: "/pro" })} />
+        
         <Row icon={<Download className="h-5 w-5 text-income" />} title={t.dataExport} subtitle={t.dataExportSub} onClick={exportData} />
         <Row icon={<RefreshCw className="h-5 w-5 text-primary" />} title={t.cloudSync} subtitle={t.cloudSyncSub} onClick={() => toast.info(t.comingSoon)} />
         <Row icon={<Shield className="h-5 w-5 text-teal-600" />} title={t.privacyPolicy} onClick={() => toast.info(t.comingSoon)} />
@@ -164,8 +153,6 @@ function SettingsPage() {
 
       <Section title={t.helpContact}>
         <Row icon={<MessageSquare className="h-5 w-5 text-primary" />} title="ফিডব্যাক পাঠান" subtitle="আপনার মতামত / সমস্যা" onClick={() => setFeedbackOpen(true)} />
-        <Row icon={<MessageCircle className="h-5 w-5 text-income" />} title={t.whatsappSupport} subtitle="01685253524" onClick={() => window.open("https://wa.me/8801685253524", "_blank")} />
-        <Row icon={<Mail className="h-5 w-5 text-blue-600" />} title={t.emailSupport} subtitle="support@hatkhoroch.com" onClick={() => (window.location.href = "mailto:support@hatkhoroch.com")} />
       </Section>
 
       {feedbackOpen && (

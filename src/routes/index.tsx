@@ -21,7 +21,7 @@ import {
   BarChart3,
   Store,
   FileText,
-  Award,
+  
   Settings,
   Grid3x3,
   History,
@@ -268,11 +268,6 @@ function Dashboard() {
           icon={<FileText className="h-6 w-6 text-slate-600" />}
           label={t.toolReport}
           onClick={() => navigate({ to: "/report" })}
-        />
-        <ToolTile
-          icon={<Award className="h-6 w-6 text-amber-500" />}
-          label={t.toolPro}
-          onClick={() => navigate({ to: "/pro" })}
         />
         <ToolTile
           icon={<Settings className="h-6 w-6 text-slate-500" />}
