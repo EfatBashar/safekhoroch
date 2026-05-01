@@ -131,7 +131,7 @@ function SettingsPage() {
         </Section>
       )}
 
-      {user && authLoading && (
+      {user && authLoading && !isAdmin && (
         <Section title="অ্যাডমিন">
           <Row
             icon={<ShieldCheck className="h-5 w-5 text-primary" />}
