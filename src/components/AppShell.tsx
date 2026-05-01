@@ -35,6 +35,7 @@ function AppShellInner() {
   const location = useLocation();
   const navigate = useNavigate();
   const { t, lang, setLang } = useT();
+  const { isAdmin } = useAuth();
   const { config } = useAppConfig();
 
   const tabs = config.bottomNav;
@@ -84,6 +85,15 @@ function AppShellInner() {
             >
               <Bell className="h-5 w-5" />
             </button>
+            {isAdmin && (
+              <button
+                onClick={() => navigate({ to: "/admin" })}
+                aria-label="Admin Panel"
+                className="flex h-10 w-10 items-center justify-center rounded-lg active:bg-white/10"
+              >
+                <ShieldCheck className="h-5 w-5" />
+              </button>
+            )}
             <button
               onClick={() => navigate({ to: "/settings" })}
               aria-label={t.settings}
