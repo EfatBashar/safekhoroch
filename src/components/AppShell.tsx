@@ -26,7 +26,7 @@ import {
   Pill,
   ReceiptText,
   Users2,
-  Award,
+  
   LogOut,
   X,
 } from "lucide-react";
