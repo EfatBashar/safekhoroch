@@ -156,8 +156,6 @@ function SettingsPage() {
 
       <Section title={t.helpContact}>
         <Row icon={<MessageSquare className="h-5 w-5 text-primary" />} title="ফিডব্যাক পাঠান" subtitle="আপনার মতামত / সমস্যা" onClick={() => setFeedbackOpen(true)} />
-        <Row icon={<MessageCircle className="h-5 w-5 text-income" />} title={t.whatsappSupport} subtitle="01685253524" onClick={() => window.open("https://wa.me/8801685253524", "_blank")} />
-        <Row icon={<Mail className="h-5 w-5 text-blue-600" />} title={t.emailSupport} subtitle="support@hatkhoroch.com" onClick={() => (window.location.href = "mailto:support@hatkhoroch.com")} />
       </Section>
 
       {feedbackOpen && (
