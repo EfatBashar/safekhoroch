@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/PageHeader";
 import { toast } from "sonner";
-import { Users, MessageSquare, BarChart3, Shield, Trash2, Check } from "lucide-react";
+import { Users, MessageSquare, BarChart3, Shield, Trash2, Check, Settings as SettingsIcon } from "lucide-react";
+import { ConfigTab } from "@/components/admin/ConfigTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
