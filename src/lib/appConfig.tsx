@@ -174,13 +174,13 @@ export function AppConfigProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const save = async (patch: Partial<AppConfig>) => {
-    const rows: { key: string; value: unknown }[] = [];
-    if (patch.branding) rows.push({ key: "branding", value: patch.branding });
-    if (patch.bottomNav) rows.push({ key: "bottomNav", value: patch.bottomNav });
-    if (patch.drawer) rows.push({ key: "drawer", value: patch.drawer });
-    if (patch.theme) rows.push({ key: "theme", value: patch.theme });
+    const rows: { key: string; value: any }[] = [];
+    if (patch.branding) rows.push({ key: "branding", value: patch.branding as any });
+    if (patch.bottomNav) rows.push({ key: "bottomNav", value: patch.bottomNav as any });
+    if (patch.drawer) rows.push({ key: "drawer", value: patch.drawer as any });
+    if (patch.theme) rows.push({ key: "theme", value: patch.theme as any });
     if (!rows.length) return;
-    const { error } = await supabase.from("app_settings").upsert(rows, { onConflict: "key" });
+    const { error } = await supabase.from("app_settings").upsert(rows as any, { onConflict: "key" });
     if (error) throw error;
     await load();
   };
