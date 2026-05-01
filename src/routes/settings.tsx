@@ -32,7 +32,7 @@ function SettingsPage() {
   const { t } = useT();
   const x = useTx();
   const navigate = useNavigate();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, loading: authLoading, signOut } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [fbMsg, setFbMsg] = useState("");
   const [fullName, setFullName] = useState<string>("");
@@ -127,6 +127,16 @@ function SettingsPage() {
             title="অ্যাডমিন প্যানেল"
             subtitle="ইউজার, স্ট্যাটস ও ফিডব্যাক ম্যানেজ"
             onClick={() => navigate({ to: "/admin" })}
+          />
+        </Section>
+      )}
+
+      {user && authLoading && (
+        <Section title="অ্যাডমিন">
+          <Row
+            icon={<ShieldCheck className="h-5 w-5 text-primary" />}
+            title="অ্যাডমিন চেক হচ্ছে..."
+            subtitle="একটু অপেক্ষা করুন"
           />
         </Section>
       )}
