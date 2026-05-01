@@ -21,7 +21,7 @@ import {
   BarChart3,
   Store,
   FileText,
-  Award,
+  
   Settings,
   Grid3x3,
   History,
