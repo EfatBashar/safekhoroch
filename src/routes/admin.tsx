@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "stats" | "users" | "feedback";
+type Tab = "stats" | "users" | "feedback" | "config";
 
 type Profile = {
   id: string;
@@ -55,16 +55,18 @@ function AdminPage() {
     <div className="pb-8">
       <PageHeader icon={Shield} title="অ্যাডমিন প্যানেল" subtitle="অ্যাপ পরিচালনা" />
 
-      <div className="sticky top-[60px] z-10 flex gap-1 border-b border-border bg-background px-3 py-2">
+      <div className="sticky top-[60px] z-10 flex gap-1 overflow-x-auto border-b border-border bg-background px-3 py-2">
         <TabBtn active={tab === "stats"} onClick={() => setTab("stats")} icon={BarChart3} label="স্ট্যাটস" />
         <TabBtn active={tab === "users"} onClick={() => setTab("users")} icon={Users} label="ইউজার" />
         <TabBtn active={tab === "feedback"} onClick={() => setTab("feedback")} icon={MessageSquare} label="ফিডব্যাক" />
+        <TabBtn active={tab === "config"} onClick={() => setTab("config")} icon={SettingsIcon} label="কনফিগ" />
       </div>
 
       <div className="px-4 pt-4">
         {tab === "stats" && <StatsTab />}
         {tab === "users" && <UsersTab />}
         {tab === "feedback" && <FeedbackTab />}
+        {tab === "config" && <ConfigTab />}
       </div>
     </div>
   );
