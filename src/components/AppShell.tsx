@@ -26,14 +26,14 @@ import {
   Pill,
   ReceiptText,
   Users2,
-  
+  ShieldCheck,
   LogOut,
   X,
 } from "lucide-react";
 import { AddSheet } from "./AddSheet";
 import { cn } from "@/lib/utils";
 import { LanguageProvider, useT } from "@/lib/i18n";
-import { AuthProvider } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 export function AppShell() {
@@ -177,6 +177,7 @@ function SideDrawer({
   onOpenChange: (v: boolean) => void;
 }) {
   const { t } = useT();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const go = (to: string) => {
@@ -236,6 +237,16 @@ function SideDrawer({
         { icon: Users2, label: t.drawerFamily2, to: "/family", color: "text-teal-600" },
       ],
     },
+    ...(isAdmin
+      ? [
+          {
+            label: "অ্যাডমিন",
+            items: [
+              { icon: ShieldCheck, label: "অ্যাডমিন প্যানেল", to: "/admin", color: "text-primary" },
+            ],
+          },
+        ]
+      : []),
     {
       items: [
         
