@@ -135,7 +135,7 @@ function SettingsPage() {
       )}
 
       <Section title={t.account_label}>
-        <Row icon={<Award className="h-5 w-5 text-amber-500" />} title={t.upgradePro} subtitle={t.proSub} onClick={() => navigate({ to: "/pro" })} />
+        
         <Row icon={<Download className="h-5 w-5 text-income" />} title={t.dataExport} subtitle={t.dataExportSub} onClick={exportData} />
         <Row icon={<RefreshCw className="h-5 w-5 text-primary" />} title={t.cloudSync} subtitle={t.cloudSyncSub} onClick={() => toast.info(t.comingSoon)} />
         <Row icon={<Shield className="h-5 w-5 text-teal-600" />} title={t.privacyPolicy} onClick={() => toast.info(t.comingSoon)} />
