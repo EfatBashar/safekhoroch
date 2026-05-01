@@ -110,7 +110,7 @@ function SettingsPage() {
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-foreground">
             {initial}
           </div>
-          <p className="mt-3 text-lg font-bold">{user?.user_metadata?.full_name || t.appName}</p>
+          <p className="mt-3 text-lg font-bold">{fullName || user?.user_metadata?.full_name || (user ? "(নামহীন)" : t.appName)}</p>
           <p className="text-xs text-muted-foreground">{user?.email || "অতিথি"}</p>
           {!user && (
             <button
