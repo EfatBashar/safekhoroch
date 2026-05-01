@@ -6,15 +6,12 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Award,
   Download,
   RefreshCw,
   Shield,
   KeyRound,
   LogOut,
   LogIn,
-  MessageCircle,
-  Mail,
   Trash2,
   ChevronRight,
   MessageSquare,
