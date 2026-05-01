@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
 import { useAuth } from "@/lib/auth";
@@ -38,6 +38,20 @@ function SettingsPage() {
   const { user, isAdmin, signOut } = useAuth();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [fbMsg, setFbMsg] = useState("");
+  const [fullName, setFullName] = useState<string>("");
+
+  useEffect(() => {
+    if (!user) {
+      setFullName("");
+      return;
+    }
+    supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => setFullName(data?.full_name || ""));
+  }, [user]);
 
   const exportData = () => {
     try {
@@ -96,7 +110,7 @@ function SettingsPage() {
           <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary text-3xl font-bold text-primary-foreground">
             {initial}
           </div>
-          <p className="mt-3 text-lg font-bold">{user?.user_metadata?.full_name || t.appName}</p>
+          <p className="mt-3 text-lg font-bold">{fullName || user?.user_metadata?.full_name || (user ? "(নামহীন)" : t.appName)}</p>
           <p className="text-xs text-muted-foreground">{user?.email || "অতিথি"}</p>
           {!user && (
             <button
