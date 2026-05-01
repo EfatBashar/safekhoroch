@@ -270,11 +270,6 @@ function Dashboard() {
           onClick={() => navigate({ to: "/report" })}
         />
         <ToolTile
-          icon={<Award className="h-6 w-6 text-amber-500" />}
-          label={t.toolPro}
-          onClick={() => navigate({ to: "/pro" })}
-        />
-        <ToolTile
           icon={<Settings className="h-6 w-6 text-slate-500" />}
           label={t.toolSettings}
           onClick={() => navigate({ to: "/settings" })}
