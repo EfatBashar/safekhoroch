@@ -8,8 +8,16 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Pocket — Personal Expense Tracker" },
+      { title: "Safe Khoroch — Personal Expense Tracker" },
       { name: "description", content: "Track income, expenses, accounts, and loans in a clean mobile-first dashboard." },
+      { property: "og:title", content: "Safe Khoroch — Personal Expense Tracker" },
+      { name: "twitter:title", content: "Safe Khoroch — Personal Expense Tracker" },
+      { property: "og:description", content: "Track income, expenses, accounts, and loans in a clean mobile-first dashboard." },
+      { name: "twitter:description", content: "Track income, expenses, accounts, and loans in a clean mobile-first dashboard." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c3256e03-e46c-4ac6-b9b6-74291906489a" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c3256e03-e46c-4ac6-b9b6-74291906489a" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:type", content: "website" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
