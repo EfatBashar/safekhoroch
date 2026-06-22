@@ -5,7 +5,6 @@ import {
   Menu,
   Bell,
   Settings as SettingsIcon,
-  User,
   ShieldCheck,
   LogOut,
   X,
