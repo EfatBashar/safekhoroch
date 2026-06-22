@@ -41,11 +41,14 @@ function TasksPage() {
     }
   };
 
-  const add = (e: React.FormEvent) => {
-    e.preventDefault();
+  const uid = () =>
+    `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+
+  const add = (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!input.trim()) return;
     persist([
-      { id: crypto.randomUUID(), text: input.trim(), done: false, createdAt: new Date().toISOString() },
+      { id: uid(), text: input.trim(), done: false, createdAt: new Date().toISOString() },
       ...tasks,
     ]);
     setInput("");
@@ -70,7 +73,14 @@ function TasksPage() {
           placeholder={t.taskPlaceholder}
           className="h-12 rounded-xl"
         />
-        <Button type="submit" className="h-12 rounded-xl bg-primary px-4">
+        <Button
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            add();
+          }}
+          className="h-12 rounded-xl bg-primary px-4"
+        >
           <Plus className="h-5 w-5" />
         </Button>
       </form>
