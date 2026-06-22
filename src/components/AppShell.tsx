@@ -5,7 +5,6 @@ import {
   Menu,
   Bell,
   Settings as SettingsIcon,
-  User,
   ShieldCheck,
   LogOut,
   X,
@@ -101,13 +100,6 @@ function AppShellInner() {
             >
               <SettingsIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={() => setDrawerOpen(true)}
-              aria-label={t.profile}
-              className="flex h-10 w-10 items-center justify-center rounded-lg active:bg-white/10"
-            >
-              <User className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </header>
@@ -167,13 +159,19 @@ function SideDrawer({
   onOpenChange: (v: boolean) => void;
 }) {
   const { t } = useT();
-  const { isAdmin } = useAuth();
+  const { isAdmin, signOut } = useAuth();
   const { config } = useAppConfig();
   const navigate = useNavigate();
 
   const go = (to: string) => {
     onOpenChange(false);
     navigate({ to });
+  };
+
+  const handleLogout = async () => {
+    onOpenChange(false);
+    await signOut();
+    navigate({ to: "/auth", replace: true });
   };
 
   return (
@@ -256,7 +254,7 @@ function SideDrawer({
               </li>
               <li>
                 <button
-                  onClick={() => go("/")}
+                  onClick={handleLogout}
                   className="flex w-full items-center gap-4 px-5 py-3 text-left active:bg-muted"
                 >
                   <LogOut className="h-5 w-5 text-rose-500" strokeWidth={2.2} />
