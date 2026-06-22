@@ -73,7 +73,14 @@ function TasksPage() {
           placeholder={t.taskPlaceholder}
           className="h-12 rounded-xl"
         />
-        <Button type="submit" className="h-12 rounded-xl bg-primary px-4">
+        <Button
+          type="submit"
+          onClick={(e) => {
+            e.preventDefault();
+            add();
+          }}
+          className="h-12 rounded-xl bg-primary px-4"
+        >
           <Plus className="h-5 w-5" />
         </Button>
       </form>
