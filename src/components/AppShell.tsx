@@ -255,7 +255,7 @@ function SideDrawer({
               </li>
               <li>
                 <button
-                  onClick={() => go("/")}
+                  onClick={handleLogout}
                   className="flex w-full items-center gap-4 px-5 py-3 text-left active:bg-muted"
                 >
                   <LogOut className="h-5 w-5 text-rose-500" strokeWidth={2.2} />
