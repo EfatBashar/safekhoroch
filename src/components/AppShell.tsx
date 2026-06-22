@@ -101,13 +101,6 @@ function AppShellInner() {
             >
               <SettingsIcon className="h-5 w-5" />
             </button>
-            <button
-              onClick={() => setDrawerOpen(true)}
-              aria-label={t.profile}
-              className="flex h-10 w-10 items-center justify-center rounded-lg active:bg-white/10"
-            >
-              <User className="h-5 w-5" />
-            </button>
           </div>
         </div>
       </header>
