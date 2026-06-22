@@ -160,13 +160,19 @@ function SideDrawer({
   onOpenChange: (v: boolean) => void;
 }) {
   const { t } = useT();
-  const { isAdmin } = useAuth();
+  const { isAdmin, signOut } = useAuth();
   const { config } = useAppConfig();
   const navigate = useNavigate();
 
   const go = (to: string) => {
     onOpenChange(false);
     navigate({ to });
+  };
+
+  const handleLogout = async () => {
+    onOpenChange(false);
+    await signOut();
+    navigate({ to: "/auth", replace: true });
   };
 
   return (
