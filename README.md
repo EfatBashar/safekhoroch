@@ -1,4 +1,4 @@
-# Pocket Pal
+# Safe Khoroc
 
 Create a personal expense tracker app.
 
