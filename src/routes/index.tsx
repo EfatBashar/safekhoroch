@@ -54,6 +54,8 @@ function greetingKey() {
 }
 
 function Dashboard() {
+  const [greeting, setGreeting] = useState<ReturnType<typeof greetingKey> | null>(null);
+  useEffect(() => setGreeting(greetingKey()), []);
   const txs = useTransactions();
   useLoans();
   const s = summary(txs);
@@ -69,7 +71,7 @@ function Dashboard() {
           👋
         </div>
         <div className="min-w-0">
-          <p className="text-base font-bold text-foreground">{t[greetingKey()]}</p>
+          <p className="text-base font-bold text-foreground">{greeting ? t[greeting] : "\u00a0"}</p>
           <p className="text-xs text-muted-foreground">{t.greetingSub}</p>
         </div>
       </div>
