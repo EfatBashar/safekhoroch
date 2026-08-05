@@ -15,18 +15,22 @@ import { LanguageProvider, useT } from "@/lib/i18n";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { AppConfigProvider, useAppConfig, DynIcon } from "@/lib/appConfig";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { FabProvider, useFab } from "@/lib/fab";
 
 export function AppShell() {
   return (
     <AuthProvider>
       <AppConfigProvider>
         <LanguageProvider>
-          <AppShellInner />
+          <FabProvider>
+            <AppShellInner />
+          </FabProvider>
         </LanguageProvider>
       </AppConfigProvider>
     </AuthProvider>
   );
 }
+
 
 function AppShellInner() {
   const [addOpen, setAddOpen] = useState(false);
