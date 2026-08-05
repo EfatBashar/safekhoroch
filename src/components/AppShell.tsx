@@ -112,18 +112,19 @@ function AppShellInner() {
         <Outlet />
       </main>
 
-      {!["/budget", "/savings", "/dps", "/bills", "/investment", "/assets", "/bakir"].some(
+      {!["/report", "/settings", "/notifications", "/admin", "/auth"].some(
         (p) => location.pathname === p || location.pathname.startsWith(p + "/"),
       ) && (
         <button
           aria-label={t.add}
-          onClick={() => setAddOpen(true)}
+          onClick={() => (fabAction ? fabAction() : setAddOpen(true))}
           className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-fab text-fab-foreground transition-transform active:scale-95"
           style={{ boxShadow: "var(--shadow-fab)" }}
         >
           <Plus className="h-7 w-7" strokeWidth={2.5} />
         </button>
       )}
+
 
       <nav className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-border bg-card/95 backdrop-blur">
         <ul className="grid px-1 pb-[calc(env(safe-area-inset-bottom)+0.25rem)] pt-1.5" style={{ gridTemplateColumns: `repeat(${Math.max(tabs.length, 1)}, minmax(0,1fr))` }}>
