@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Users2, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
 import { familyStore } from "@/lib/listStore";
+import { useRegisterFab } from "@/lib/fab";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
 
 export const Route = createFileRoute("/family")({
@@ -18,7 +19,13 @@ function FamilyPage() {
   const x = useTx();
   const items = familyStore.use();
   const [name, setName] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
   const [rel, setRel] = useState("");
+
+  useRegisterFab(() => {
+    nameRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    nameRef.current?.focus();
+  });
 
   const add = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +45,7 @@ function FamilyPage() {
       </div>
       <form onSubmit={add} className="mt-4 flex gap-2 px-4">
         <Input
+          ref={nameRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t.name}

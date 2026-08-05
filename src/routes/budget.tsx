@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Wallet, Plus, Trash2 } from "lucide-react";
+import { Wallet, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import { budgetStore } from "@/lib/listStore";
 import { formatCurrency, useTransactions } from "@/lib/store";
 import { EXPENSE_CATEGORIES } from "@/lib/types";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
+import { useRegisterFab } from "@/lib/fab";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/budget")({
@@ -160,14 +161,6 @@ function BudgetForm({ onDone }: { onDone: () => void }) {
 }
 
 export function FabAdd({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label="add"
-      className="fixed bottom-20 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-2xl bg-fab text-fab-foreground active:scale-95"
-      style={{ boxShadow: "var(--shadow-fab)" }}
-    >
-      <Plus className="h-7 w-7" strokeWidth={2.5} />
-    </button>
-  );
+  useRegisterFab(onClick);
+  return null;
 }

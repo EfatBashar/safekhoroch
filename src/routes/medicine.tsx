@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pill, Check, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
 import { medicineStore } from "@/lib/listStore";
+import { useRegisterFab } from "@/lib/fab";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
 
 export const Route = createFileRoute("/medicine")({
@@ -18,7 +19,13 @@ function MedicinePage() {
   const x = useTx();
   const items = medicineStore.use();
   const [name, setName] = useState("");
+  const nameRef = useRef<HTMLInputElement>(null);
   const [dose, setDose] = useState("");
+
+  useRegisterFab(() => {
+    nameRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    nameRef.current?.focus();
+  });
 
   const add = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +45,7 @@ function MedicinePage() {
       <PageHeader icon={Pill} title={x.medicineTitle} subtitle={x.medicineSub} tone="debt" />
       <form onSubmit={add} className="mt-4 flex gap-2 px-4">
         <Input
+          ref={nameRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder={t.name}

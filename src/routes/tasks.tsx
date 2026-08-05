@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Plus, Check, Trash2, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRegisterFab } from "@/lib/fab";
 
 type Task = { id: string; text: string; done: boolean; createdAt: string };
 const KEY = "etracker.tasks.v1";
@@ -22,6 +23,12 @@ function TasksPage() {
   const { t } = useT();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useRegisterFab(() => {
+    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    inputRef.current?.focus();
+  });
 
   useEffect(() => {
     try {
@@ -68,6 +75,7 @@ function TasksPage() {
 
       <form onSubmit={add} className="mt-4 flex gap-2">
         <Input
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={t.taskPlaceholder}
