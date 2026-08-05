@@ -40,6 +40,8 @@ function AppShellInner() {
   const { t, lang, setLang } = useT();
   const { isAdmin } = useAuth();
   const { config } = useAppConfig();
+  const { action: fabAction } = useFab();
+
 
   const tabs = config.bottomNav;
 
