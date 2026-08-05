@@ -1,4 +1,4 @@
-# Safe Khoroc
+# Safe Khoroch
 
 Create a personal expense tracker app.
 
