@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useLoans, useTransactions, formatCurrency } from "@/lib/store";
 import { summary } from "@/lib/calc";
 import { useT } from "@/lib/i18n";
