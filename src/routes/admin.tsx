@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/PageHeader";
 import { toast } from "sonner";
-import { Users, MessageSquare, BarChart3, Shield, Trash2, Check, Settings as SettingsIcon } from "lucide-react";
+import { Users, MessageSquare, BarChart3, Shield, Trash2, Check, Settings as SettingsIcon, Crown, Search } from "lucide-react";
 import { ConfigTab } from "@/components/admin/ConfigTab";
+import { PremiumTab } from "@/components/admin/PremiumTab";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "stats" | "users" | "feedback" | "config";
+type Tab = "stats" | "users" | "feedback" | "config" | "premium";
 
 type Profile = {
   id: string;
@@ -59,6 +60,7 @@ function AdminPage() {
         <TabBtn active={tab === "stats"} onClick={() => setTab("stats")} icon={BarChart3} label="স্ট্যাটস" />
         <TabBtn active={tab === "users"} onClick={() => setTab("users")} icon={Users} label="ইউজার" />
         <TabBtn active={tab === "feedback"} onClick={() => setTab("feedback")} icon={MessageSquare} label="ফিডব্যাক" />
+        <TabBtn active={tab === "premium"} onClick={() => setTab("premium")} icon={Crown} label="প্রিমিয়াম" />
         <TabBtn active={tab === "config"} onClick={() => setTab("config")} icon={SettingsIcon} label="কনফিগ" />
       </div>
 
@@ -66,6 +68,7 @@ function AdminPage() {
         {tab === "stats" && <StatsTab />}
         {tab === "users" && <UsersTab />}
         {tab === "feedback" && <FeedbackTab />}
+        {tab === "premium" && <PremiumTab />}
         {tab === "config" && <ConfigTab />}
       </div>
     </div>
@@ -97,19 +100,21 @@ function TabBtn({
 }
 
 function StatsTab() {
-  const [stats, setStats] = useState({ users: 0, admins: 0, feedback: 0, openFeedback: 0 });
+  const [stats, setStats] = useState({ users: 0, admins: 0, premium: 0, feedback: 0, openFeedback: 0 });
 
   useEffect(() => {
     (async () => {
-      const [u, r, f, fo] = await Promise.all([
+      const [u, r, pr, f, fo] = await Promise.all([
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin"),
+        supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "premium"),
         supabase.from("feedback").select("*", { count: "exact", head: true }),
         supabase.from("feedback").select("*", { count: "exact", head: true }).eq("status", "open"),
       ]);
       setStats({
         users: u.count ?? 0,
         admins: r.count ?? 0,
+        premium: pr.count ?? 0,
         feedback: f.count ?? 0,
         openFeedback: fo.count ?? 0,
       });
@@ -120,6 +125,7 @@ function StatsTab() {
     <div className="grid grid-cols-2 gap-3">
       <StatCard label="মোট ইউজার" value={stats.users} icon={Users} />
       <StatCard label="অ্যাডমিন" value={stats.admins} icon={Shield} />
+      <StatCard label="প্রিমিয়াম ইউজার" value={stats.premium} icon={Crown} />
       <StatCard label="মোট ফিডব্যাক" value={stats.feedback} icon={MessageSquare} />
       <StatCard label="অপঠিত ফিডব্যাক" value={stats.openFeedback} icon={MessageSquare} />
     </div>
@@ -137,8 +143,9 @@ function StatCard({ label, value, icon: Icon }: { label: string; value: number; 
 }
 
 function UsersTab() {
-  const [users, setUsers] = useState<(Profile & { is_admin: boolean })[]>([]);
+  const [users, setUsers] = useState<(Profile & { is_admin: boolean; is_premium: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -146,9 +153,18 @@ function UsersTab() {
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false });
-    const { data: roles } = await supabase.from("user_roles").select("user_id,role").eq("role", "admin");
-    const adminSet = new Set((roles ?? []).map((r) => r.user_id));
-    setUsers((profiles ?? []).map((p) => ({ ...p, is_admin: adminSet.has(p.id) })));
+    const { data: roles } = await supabase.from("user_roles").select("user_id,role");
+    const adminSet = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
+    const premiumSet = new Set(
+      (roles ?? []).filter((r) => r.role === "premium").map((r) => r.user_id),
+    );
+    setUsers(
+      (profiles ?? []).map((p) => ({
+        ...p,
+        is_admin: adminSet.has(p.id),
+        is_premium: premiumSet.has(p.id),
+      })),
+    );
     setLoading(false);
   };
 
@@ -156,47 +172,91 @@ function UsersTab() {
     load();
   }, []);
 
-  const toggleAdmin = async (uid: string, makeAdmin: boolean) => {
-    if (makeAdmin) {
-      const { error } = await supabase.from("user_roles").insert({ user_id: uid, role: "admin" });
+  const toggleRole = async (uid: string, role: "admin" | "premium", enable: boolean) => {
+    if (enable) {
+      const { error } = await supabase.from("user_roles").insert({ user_id: uid, role });
       if (error) return toast.error(error.message);
-      toast.success("অ্যাডমিন করা হয়েছে");
     } else {
       const { error } = await supabase
         .from("user_roles")
         .delete()
         .eq("user_id", uid)
-        .eq("role", "admin");
+        .eq("role", role);
       if (error) return toast.error(error.message);
-      toast.success("অ্যাডমিন সরানো হয়েছে");
     }
+    toast.success("আপডেট হয়েছে");
     load();
   };
 
+  const filtered = users.filter((u) => {
+    const s = q.trim().toLowerCase();
+    if (!s) return true;
+    return (u.full_name ?? "").toLowerCase().includes(s) || (u.email ?? "").toLowerCase().includes(s);
+  });
+
   if (loading) return <p className="text-sm text-muted-foreground">লোড হচ্ছে...</p>;
-  if (!users.length) return <p className="text-sm text-muted-foreground">কোনো ইউজার নেই</p>;
 
   return (
     <div className="space-y-2">
-      {users.map((u) => (
-        <div key={u.id} className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-sm">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 font-bold text-primary">
-            {(u.full_name || u.email || "?").slice(0, 1).toUpperCase()}
+      <div className="flex items-center gap-2 rounded-xl bg-card px-3 py-2 shadow-sm">
+        <Search className="h-4 w-4 text-muted-foreground" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="নাম বা ইমেইল খুঁজুন"
+          className="w-full bg-transparent text-sm outline-none"
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">মোট {filtered.length} জন ইউজার</p>
+
+      {!filtered.length && <p className="text-sm text-muted-foreground">কোনো ইউজার নেই</p>}
+
+      {filtered.map((u) => (
+        <div key={u.id} className="rounded-xl bg-card p-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 font-bold text-primary">
+              {(u.full_name || u.email || "?").slice(0, 1).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold">{u.full_name || "(নামহীন)"}</p>
+              <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
+                সাইনআপ: {new Date(u.created_at).toLocaleString("bn-BD")}
+              </p>
+            </div>
+            <span
+              className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                u.is_admin
+                  ? "bg-primary/15 text-primary"
+                  : u.is_premium
+                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                    : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {u.is_admin ? "অ্যাডমিন" : u.is_premium ? "প্রিমিয়াম" : "ফ্রি"}
+            </span>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold">{u.full_name || "(নামহীন)"}</p>
-            <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={() => toggleRole(u.id, "admin", !u.is_admin)}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-bold ${
+                u.is_admin ? "bg-primary/15 text-primary" : "bg-muted text-foreground"
+              }`}
+            >
+              {u.is_admin ? "অ্যাডমিন সরান" : "অ্যাডমিন করুন"}
+            </button>
+            <button
+              onClick={() => toggleRole(u.id, "premium", !u.is_premium)}
+              className={`flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold ${
+                u.is_premium
+                  ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                  : "bg-muted text-foreground"
+              }`}
+            >
+              <Crown className="h-3 w-3" />
+              {u.is_premium ? "প্রিমিয়াম সরান" : "প্রিমিয়াম করুন"}
+            </button>
           </div>
-          <button
-            onClick={() => toggleAdmin(u.id, !u.is_admin)}
-            className={`shrink-0 rounded-lg px-2.5 py-1 text-xs font-bold ${
-              u.is_admin
-                ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-                : "bg-muted text-foreground"
-            }`}
-          >
-            {u.is_admin ? "অ্যাডমিন" : "ইউজার"}
-          </button>
         </div>
       ))}
     </div>
