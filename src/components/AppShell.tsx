@@ -16,16 +16,22 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { AppConfigProvider, useAppConfig, DynIcon } from "@/lib/appConfig";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { FabProvider, useFab } from "@/lib/fab";
+import { PremiumProvider, usePremium } from "@/lib/premium";
+import { PremiumLockScreen } from "@/components/PremiumGate";
+import { Lock } from "lucide-react";
+import { toast } from "sonner";
 
 export function AppShell() {
   return (
     <AuthProvider>
       <AppConfigProvider>
-        <LanguageProvider>
-          <FabProvider>
-            <AppShellInner />
-          </FabProvider>
-        </LanguageProvider>
+        <PremiumProvider>
+          <LanguageProvider>
+            <FabProvider>
+              <AppShellInner />
+            </FabProvider>
+          </LanguageProvider>
+        </PremiumProvider>
       </AppConfigProvider>
     </AuthProvider>
   );
@@ -41,6 +47,8 @@ function AppShellInner() {
   const { isAdmin } = useAuth();
   const { config } = useAppConfig();
   const { action: fabAction } = useFab();
+  const { isLocked } = usePremium();
+  const locked = isLocked(location.pathname);
 
 
   const tabs = config.bottomNav;
@@ -111,10 +119,10 @@ function AppShellInner() {
       </header>
 
       <main className="flex-1 pb-32">
-        <Outlet />
+        {locked ? <PremiumLockScreen /> : <Outlet />}
       </main>
 
-      {!["/report", "/settings", "/notifications", "/admin", "/auth"].some(
+      {!locked && !["/report", "/settings", "/notifications", "/admin", "/auth"].some(
         (p) => location.pathname === p || location.pathname.startsWith(p + "/"),
       ) && (
         <button
@@ -134,16 +142,27 @@ function AppShellInner() {
             const active = tab.to === "/"
               ? location.pathname === "/"
               : location.pathname === tab.to || location.pathname.startsWith(tab.to + "/");
+            const tabLocked = isLocked(tab.to);
             return (
               <li key={tab.id}>
                 <Link
                   to={tab.to}
+                  onClick={(e) => {
+                    if (tabLocked) {
+                      e.preventDefault();
+                      toast.error("এটি একটি প্রিমিয়াম ফিচার");
+                    }
+                  }}
                   className={cn(
-                    "flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors",
+                    "relative flex flex-col items-center gap-0.5 rounded-xl py-1.5 text-[10px] font-semibold transition-colors",
                     active ? "text-primary" : "text-muted-foreground",
+                    tabLocked && "opacity-60",
                   )}
                 >
                   <DynIcon icon={tab.icon} className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+                  {tabLocked && (
+                    <Lock className="absolute right-1.5 top-0 h-3 w-3 text-amber-500" strokeWidth={3} />
+                  )}
                   <span className="leading-tight">{tab.label}</span>
                 </Link>
               </li>
@@ -168,6 +187,7 @@ function SideDrawer({
   const { t } = useT();
   const { isAdmin, signOut } = useAuth();
   const { config } = useAppConfig();
+  const { isLocked } = usePremium();
   const navigate = useNavigate();
 
   const go = (to: string) => {
@@ -214,17 +234,30 @@ function SideDrawer({
                 </p>
               )}
               <ul>
-                {section.items.map((item) => (
-                  <li key={item.id}>
-                    <button
-                      onClick={() => go(item.to)}
-                      className="flex w-full items-center gap-4 px-5 py-3 text-left active:bg-muted"
-                    >
-                      <DynIcon icon={item.icon} className={cn("h-5 w-5", item.color)} strokeWidth={2.2} />
-                      <span className="text-sm font-medium text-foreground">{item.label}</span>
-                    </button>
-                  </li>
-                ))}
+                {section.items.map((item) => {
+                  const itemLocked = isLocked(item.to);
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => {
+                          if (itemLocked) {
+                            onOpenChange(false);
+                            toast.error("এটি একটি প্রিমিয়াম ফিচার");
+                            return;
+                          }
+                          go(item.to);
+                        }}
+                        className="flex w-full items-center gap-4 px-5 py-3 text-left active:bg-muted"
+                      >
+                        <DynIcon icon={item.icon} className={cn("h-5 w-5", item.color, itemLocked && "opacity-60")} strokeWidth={2.2} />
+                        <span className={cn("flex-1 text-sm font-medium text-foreground", itemLocked && "opacity-60")}>
+                          {item.label}
+                        </span>
+                        {itemLocked && <Lock className="h-4 w-4 text-amber-500" />}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
