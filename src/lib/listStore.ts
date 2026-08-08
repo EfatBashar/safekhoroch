@@ -76,11 +76,11 @@ export function createListStore<T extends { id: string }>(key: string) {
 
 export type Budget = { id: string; category: string; limit: number };
 export type Savings = { id: string; goal: string; target: number; saved: number };
-export type DPS = { id: string; bank: string; monthly: number; months: number };
+export type DPS = { id: string; bank: string; monthly: number; months: number; paidMonths?: number };
 export type Investment = { id: string; name: string; amount: number; note?: string };
 export type Asset = { id: string; name: string; value: number; type: string };
 export type Bill = { id: string; name: string; amount: number; dueDay: number; paid: boolean };
-export type MarketItem = { id: string; name: string; qty: string; bought: boolean };
+export type MarketItem = { id: string; name: string; qty: string; bought: boolean; price?: number };
 export type Medicine = { id: string; name: string; dose: string; taken: boolean };
 export type Family = { id: string; name: string; relation: string };
 export type LedgerEntry = {
