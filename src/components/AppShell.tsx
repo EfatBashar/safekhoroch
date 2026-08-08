@@ -215,25 +215,6 @@ function SideDrawer({
   const { isAdmin, signOut } = useAuth();
   const { config } = useAppConfig();
   const { isLocked } = usePremium();
-  const x = useTx();
-  const notifs = notificationStore.use();
-  const unread = notifs.filter((n) => !n.read).length;
-
-  useEffect(() => {
-    scanBillReminders({
-      title: x.billDueTitle,
-      dueIn: (d) => (d <= 0 ? x.fToday : `${d} ${lang === "bn" ? "দিন বাকি" : "days left"}`),
-    });
-    const id = setInterval(
-      () =>
-        scanBillReminders({
-          title: x.billDueTitle,
-          dueIn: (d) => (d <= 0 ? x.fToday : `${d} ${lang === "bn" ? "দিন বাকি" : "days left"}`),
-        }),
-      60 * 60 * 1000,
-    );
-    return () => clearInterval(id);
-  }, [x, lang]);
   const navigate = useNavigate();
 
   const go = (to: string) => {
