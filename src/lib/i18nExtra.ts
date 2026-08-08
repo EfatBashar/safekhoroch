@@ -66,6 +66,23 @@ type S = {
   members: string;
   monthlyEMI: string;
   matureValue: string;
+  price: string;
+  marketSpend: string;
+  withdraw: string;
+  savedTotal: string;
+  available: string;
+  payInstallment: string;
+  installmentsPaid: string;
+  searchPlaceholder: string;
+  fAll: string;
+  fToday: string;
+  fMonth: string;
+  enableNotif: string;
+  notifOn: string;
+  notifBlocked: string;
+  billDueTitle: string;
+  fromAccount: string;
+  noResults: string;
 };
 
 const en: S = {
@@ -134,6 +151,23 @@ const en: S = {
   members: "members",
   monthlyEMI: "Monthly",
   matureValue: "Matures to",
+  price: "Price",
+  marketSpend: "Market spend",
+  withdraw: "Withdraw",
+  savedTotal: "In savings",
+  available: "Spendable",
+  payInstallment: "Pay installment",
+  installmentsPaid: "installments paid",
+  searchPlaceholder: "Search category, note or amount",
+  fAll: "All time",
+  fToday: "Today",
+  fMonth: "This month",
+  enableNotif: "Bill reminders (browser notification)",
+  notifOn: "Reminders enabled",
+  notifBlocked: "Notification permission denied",
+  billDueTitle: "Bill due",
+  fromAccount: "From",
+  noResults: "Nothing found",
 };
 
 const bn: S = {
@@ -202,6 +236,23 @@ const bn: S = {
   members: "সদস্য",
   monthlyEMI: "মাসিক",
   matureValue: "মেয়াদান্তে",
+  price: "দাম",
+  marketSpend: "বাজার খরচ",
+  withdraw: "উত্তোলন",
+  savedTotal: "সঞ্চয়ে জমা",
+  available: "খরচযোগ্য",
+  payInstallment: "কিস্তি দিন",
+  installmentsPaid: "কিস্তি জমা",
+  searchPlaceholder: "ক্যাটাগরি, নোট বা টাকা খুঁজুন",
+  fAll: "সব সময়",
+  fToday: "আজ",
+  fMonth: "এই মাস",
+  enableNotif: "বিল রিমাইন্ডার (ব্রাউজার নোটিফিকেশন)",
+  notifOn: "রিমাইন্ডার চালু হয়েছে",
+  notifBlocked: "নোটিফিকেশন অনুমতি দেওয়া হয়নি",
+  billDueTitle: "বিলের সময় হয়েছে",
+  fromAccount: "কোথা থেকে",
+  noResults: "কিছু পাওয়া যায়নি",
 };
 
 export function useTx() {
