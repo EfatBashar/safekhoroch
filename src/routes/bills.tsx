@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
 import { billStore } from "@/lib/listStore";
-import { formatCurrency } from "@/lib/store";
+import { formatCurrency, newId, store } from "@/lib/store";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
 import { FabAdd } from "./budget";
 import { toast } from "sonner";
@@ -45,14 +45,38 @@ function BillsPage() {
               <div className="flex items-center gap-2">
                 <p className="font-display text-base font-bold text-expense">{fc(b.amount)}</p>
                 <button
-                  onClick={() => billStore.update(b.id, { paid: !b.paid })}
+                  onClick={() => {
+                    const paid = !b.paid;
+                    billStore.update(b.id, { paid });
+                    if (paid) {
+                      store.addLinked({
+                        type: "expense",
+                        amount: b.amount,
+                        category: "Bills",
+                        account: "cash",
+                        note: b.name,
+                        date: new Date().toISOString(),
+                        source: "bill",
+                        refId: b.id,
+                      });
+                      toast.success(t.saved);
+                    } else {
+                      store.removeByRef(b.id);
+                    }
+                  }}
                   className={`rounded-full px-3 py-1 text-[11px] font-bold ${
                     b.paid ? "bg-income/15 text-income" : "bg-expense/15 text-expense"
                   }`}
                 >
                   {b.paid ? x.paid : x.unpaid}
                 </button>
-                <button onClick={() => billStore.remove(b.id)} aria-label={t.delete}>
+                <button
+                  onClick={() => {
+                    store.removeByRef(b.id);
+                    billStore.remove(b.id);
+                  }}
+                  aria-label={t.delete}
+                >
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
@@ -89,7 +113,7 @@ function Form({ onDone }: { onDone: () => void }) {
     const a = parseFloat(amount);
     const d = parseInt(day, 10);
     if (!name.trim() || !a || a <= 0 || !d) return toast.error(t.enterValidAmount);
-    billStore.add({ id: crypto.randomUUID(), name: name.trim(), amount: a, dueDay: d, paid: false });
+    billStore.add({ id: newId(), name: name.trim(), amount: a, dueDay: d, paid: false });
     onDone();
   };
   return (

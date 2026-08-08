@@ -2,9 +2,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { formatCurrency, store, useTransactions } from "@/lib/store";
 import { summary } from "@/lib/calc";
-import { ArrowDownRight, ArrowUpRight, Receipt, Plus, Trash2, List, ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Receipt, Plus, Trash2, List, ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useT } from "@/lib/i18n";
+import { useTx } from "@/lib/i18nExtra";
 
 export const Route = createFileRoute("/transactions")({
   head: () => ({
@@ -17,20 +19,43 @@ export const Route = createFileRoute("/transactions")({
 });
 
 type Filter = "all" | "expense" | "income";
+type Range = "all" | "today" | "month";
 
 function TransactionsPage() {
   const txs = useTransactions();
   const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const [range, setRange] = useState<Range>("all");
   const { t, tc, lang } = useT();
+  const x = useTx();
   const fc = (n: number) => formatCurrency(n, lang);
   const navigate = useNavigate();
   const s = summary(txs);
   const net = s.income - s.expense;
 
-  const filtered = useMemo(
-    () => (filter === "all" ? txs : txs.filter((tx) => tx.type === filter)),
-    [txs, filter],
-  );
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const now = new Date();
+    return txs.filter((tx) => {
+      if (filter !== "all" && tx.type !== filter) return false;
+      if (range !== "all") {
+        const d = new Date(tx.date);
+        if (range === "today" && d.toDateString() !== now.toDateString()) return false;
+        if (
+          range === "month" &&
+          (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear())
+        )
+          return false;
+      }
+      if (!q) return true;
+      return (
+        tx.category.toLowerCase().includes(q) ||
+        tc(tx.category).toLowerCase().includes(q) ||
+        (tx.note ?? "").toLowerCase().includes(q) ||
+        String(tx.amount).includes(q)
+      );
+    });
+  }, [txs, filter, query, range, tc]);
 
   const groups = useMemo(() => {
     const map = new Map<string, typeof filtered>();
@@ -72,6 +97,46 @@ function TransactionsPage() {
         ))}
       </div>
 
+      {/* Search + date range */}
+      <div className="space-y-2 border-b border-border bg-card px-4 pb-3 pt-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={x.searchPlaceholder}
+            className="h-11 rounded-xl pl-9 pr-9"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              aria-label={x.cancel}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <div className="flex gap-2">
+          {([
+            ["all", x.fAll],
+            ["today", x.fToday],
+            ["month", x.fMonth],
+          ] as [Range, string][]).map(([k, label]) => (
+            <button
+              key={k}
+              onClick={() => setRange(k)}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+                range === k ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Net balance bar */}
       <div className="flex items-end justify-between bg-card px-4 py-3">
         <div>
@@ -90,7 +155,9 @@ function TransactionsPage() {
           <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
             <Receipt className="h-12 w-12" strokeWidth={1.5} />
           </div>
-          <p className="mt-4 font-display text-lg font-bold">{t.noTxTitle}</p>
+          <p className="mt-4 font-display text-lg font-bold">
+            {query || range !== "all" ? x.noResults : t.noTxTitle}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">{t.noTxSub}</p>
         </div>
       ) : (

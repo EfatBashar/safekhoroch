@@ -2,7 +2,9 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useLoans, useTransactions, formatCurrency } from "@/lib/store";
 import { summary } from "@/lib/calc";
+import { savingsStore } from "@/lib/listStore";
 import { useT } from "@/lib/i18n";
+import { useTx } from "@/lib/i18nExtra";
 import {
   Wallet,
   Landmark,
@@ -60,7 +62,10 @@ function Dashboard() {
   const txs = useTransactions();
   useLoans();
   const s = summary(txs);
+  const savings = savingsStore.use();
+  const inSavings = savings.reduce((sum, g) => sum + g.saved, 0);
   const { t, tc, lang } = useT();
+  const x = useTx();
   const fc = (n: number) => formatCurrency(n, lang);
   const navigate = useNavigate();
 
@@ -74,6 +79,18 @@ function Dashboard() {
         <div className="min-w-0">
           <p className="text-base font-bold text-foreground">{greeting ? t[greeting] : "\u00a0"}</p>
           <p className="text-xs text-muted-foreground">{t.greetingSub}</p>
+        </div>
+      </div>
+
+      {/* Available money */}
+      <div className="mt-3 flex items-center justify-between rounded-2xl bg-balance px-4 py-3 text-balance-foreground">
+        <div>
+          <p className="text-[11px] font-semibold opacity-80">{x.available}</p>
+          <p className="font-display text-2xl font-bold">{fc(s.cash + s.bank)}</p>
+        </div>
+        <div className="text-right">
+          <p className="text-[11px] font-semibold opacity-80">{x.savedTotal}</p>
+          <p className="font-display text-lg font-bold">{fc(inSavings)}</p>
         </div>
       </div>
 

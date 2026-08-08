@@ -16,7 +16,9 @@ import {
   ChevronRight,
   MessageSquare,
   ShieldCheck,
+  Bell,
 } from "lucide-react";
+import { remindersEnabled, setRemindersEnabled, requestNotificationPermission } from "@/lib/reminders";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -36,6 +38,22 @@ function SettingsPage() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [fbMsg, setFbMsg] = useState("");
   const [fullName, setFullName] = useState<string>("");
+  const [notifOn, setNotifOn] = useState(false);
+
+  useEffect(() => setNotifOn(remindersEnabled()), []);
+
+  const toggleNotif = async () => {
+    if (notifOn) {
+      setRemindersEnabled(false);
+      setNotifOn(false);
+      return;
+    }
+    const ok = await requestNotificationPermission();
+    if (!ok) return toast.error(x.notifBlocked);
+    setRemindersEnabled(true);
+    setNotifOn(true);
+    toast.success(x.notifOn);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -145,6 +163,12 @@ function SettingsPage() {
         
         <Row icon={<Download className="h-5 w-5 text-income" />} title={t.dataExport} subtitle={t.dataExportSub} onClick={exportData} />
         <Row icon={<RefreshCw className="h-5 w-5 text-primary" />} title={t.cloudSync} subtitle={t.cloudSyncSub} onClick={() => toast.info(t.comingSoon)} />
+        <Row
+          icon={<Bell className={`h-5 w-5 ${notifOn ? "text-income" : "text-muted-foreground"}`} />}
+          title={x.enableNotif}
+          subtitle={notifOn ? x.notifOn : ""}
+          onClick={toggleNotif}
+        />
         <Row icon={<Shield className="h-5 w-5 text-teal-600" />} title={t.privacyPolicy} onClick={() => toast.info(t.comingSoon)} />
         <Row icon={<KeyRound className="h-5 w-5 text-blue-600" />} title={t.changePassword} onClick={() => toast.info(t.comingSoon)} />
         {user ? (
