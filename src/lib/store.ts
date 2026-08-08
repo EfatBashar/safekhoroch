@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Account, Loan, Transaction, TxSource } from "./types";
+import type { Loan, Transaction, TxSource } from "./types";
 
 const TX_KEY = "etracker.transactions.v1";
 const LOAN_KEY = "etracker.loans.v1";
