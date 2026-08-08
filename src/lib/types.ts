@@ -1,6 +1,8 @@
 export type TxType = "income" | "expense";
 export type Account = "cash" | "bank";
 
+export type TxSource = "manual" | "loan" | "market" | "savings" | "dps" | "bill";
+
 export interface Transaction {
   id: string;
   type: TxType;
@@ -9,6 +11,10 @@ export interface Transaction {
   account: Account;
   note?: string;
   date: string; // ISO
+  /** where this entry came from; transfers don't count as income/expense */
+  source?: TxSource;
+  /** id of the linked loan / market item / savings goal / bill */
+  refId?: string;
 }
 
 export type LoanType = "borrow" | "lend"; // borrow = I owe; lend = owed to me
@@ -21,6 +27,7 @@ export interface Loan {
   date: string;
   note?: string;
   settled: boolean;
+  account?: Account;
 }
 
 export const INCOME_CATEGORIES = [
