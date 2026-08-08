@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Menu,
@@ -20,6 +20,9 @@ import { PremiumProvider, usePremium } from "@/lib/premium";
 import { PremiumLockScreen } from "@/components/PremiumGate";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
+import { scanBillReminders } from "@/lib/reminders";
+import { notificationStore } from "@/lib/listStore";
+import { useTx } from "@/lib/i18nExtra";
 
 export function AppShell() {
   return (
@@ -48,6 +51,25 @@ function AppShellInner() {
   const { config } = useAppConfig();
   const { action: fabAction } = useFab();
   const { isLocked } = usePremium();
+  const x = useTx();
+  const notifs = notificationStore.use();
+  const unread = notifs.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    scanBillReminders({
+      title: x.billDueTitle,
+      dueIn: (d) => (d <= 0 ? x.fToday : `${d} ${lang === "bn" ? "দিন বাকি" : "days left"}`),
+    });
+    const id = setInterval(
+      () =>
+        scanBillReminders({
+          title: x.billDueTitle,
+          dueIn: (d) => (d <= 0 ? x.fToday : `${d} ${lang === "bn" ? "দিন বাকি" : "days left"}`),
+        }),
+      60 * 60 * 1000,
+    );
+    return () => clearInterval(id);
+  }, [x, lang]);
   const locked = isLocked(location.pathname);
 
 
@@ -94,9 +116,14 @@ function AppShellInner() {
             <button
               onClick={() => navigate({ to: "/notifications" })}
               aria-label={t.notifications}
-              className="flex h-10 w-10 items-center justify-center rounded-lg active:bg-white/10"
+              className="relative flex h-10 w-10 items-center justify-center rounded-lg active:bg-white/10"
             >
               <Bell className="h-5 w-5" />
+              {unread > 0 && (
+                <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-expense px-1 text-[10px] font-bold text-white">
+                  {unread > 9 ? "9+" : unread}
+                </span>
+              )}
             </button>
             {isAdmin && (
               <button
@@ -188,6 +215,25 @@ function SideDrawer({
   const { isAdmin, signOut } = useAuth();
   const { config } = useAppConfig();
   const { isLocked } = usePremium();
+  const x = useTx();
+  const notifs = notificationStore.use();
+  const unread = notifs.filter((n) => !n.read).length;
+
+  useEffect(() => {
+    scanBillReminders({
+      title: x.billDueTitle,
+      dueIn: (d) => (d <= 0 ? x.fToday : `${d} ${lang === "bn" ? "দিন বাকি" : "days left"}`),
+    });
+    const id = setInterval(
+      () =>
+        scanBillReminders({
+          title: x.billDueTitle,
+          dueIn: (d) => (d <= 0 ? x.fToday : `${d} ${lang === "bn" ? "দিন বাকি" : "days left"}`),
+        }),
+      60 * 60 * 1000,
+    );
+    return () => clearInterval(id);
+  }, [x, lang]);
   const navigate = useNavigate();
 
   const go = (to: string) => {
