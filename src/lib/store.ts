@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Loan, Transaction } from "./types";
+import type { Account, Loan, Transaction, TxSource } from "./types";
 
 const TX_KEY = "etracker.transactions.v1";
 const LOAN_KEY = "etracker.loans.v1";
@@ -55,21 +55,60 @@ export const store = {
     write(TX_KEY, all);
     emit();
   },
+  /** Add an entry linked to another record (loan, bill, market item...). */
+  addLinked(tx: Omit<Transaction, "id"> & { source: TxSource; refId: string }) {
+    store.addTransaction({ id: newId(), ...tx });
+  },
+  /** Remove every entry linked to a given reference id. */
+  removeByRef(refId: string) {
+    const all = store.getTransactions().filter((t) => t.refId !== refId);
+    write(TX_KEY, all);
+    emit();
+  },
   addLoan(loan: Loan) {
     const all = [loan, ...store.getLoans()];
     write(LOAN_KEY, all);
-    emit();
+    // Borrowing brings money in, lending takes money out.
+    store.addLinked({
+      type: loan.type === "borrow" ? "income" : "expense",
+      amount: loan.amount,
+      category: loan.type === "borrow" ? "Borrowed" : "Lent",
+      account: loan.account ?? "cash",
+      note: loan.person,
+      date: loan.date,
+      source: "loan",
+      refId: loan.id,
+    });
   },
   toggleLoan(id: string) {
-    const all = store.getLoans().map((l) =>
-      l.id === id ? { ...l, settled: !l.settled } : l,
-    );
+    const loan = store.getLoans().find((l) => l.id === id);
+    if (!loan) return;
+    const settled = !loan.settled;
+    const all = store.getLoans().map((l) => (l.id === id ? { ...l, settled } : l));
     write(LOAN_KEY, all);
+    const settleRef = `${id}:settle`;
+    if (settled) {
+      // Settling reverses the original movement.
+      store.addLinked({
+        type: loan.type === "borrow" ? "expense" : "income",
+        amount: loan.amount,
+        category: loan.type === "borrow" ? "Loan repaid" : "Loan recovered",
+        account: loan.account ?? "cash",
+        note: loan.person,
+        date: new Date().toISOString(),
+        source: "loan",
+        refId: settleRef,
+      });
+    } else {
+      store.removeByRef(settleRef);
+    }
     emit();
   },
   deleteLoan(id: string) {
     const all = store.getLoans().filter((l) => l.id !== id);
     write(LOAN_KEY, all);
+    store.removeByRef(id);
+    store.removeByRef(`${id}:settle`);
     emit();
   },
   subscribe(l: () => void) {
@@ -96,16 +135,21 @@ export function useLoans() {
   return useHydrated(store.getLoans, [] as Loan[]);
 }
 
+/** Always BDT (৳); only the digit formatting follows the UI language. */
 export function formatCurrency(n: number, lang: "en" | "bn" = "en") {
-  if (lang === "bn") {
-    const formatted = new Intl.NumberFormat("bn-BD", {
-      maximumFractionDigits: 0,
-    }).format(Math.abs(n));
-    return `৳${formatted}`;
-  }
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  const locale = lang === "bn" ? "bn-BD" : "en-BD";
+  const formatted = new Intl.NumberFormat(locale, {
     maximumFractionDigits: 0,
-  }).format(n);
+  }).format(Math.abs(n));
+  return `${n < 0 ? "−" : ""}৳${formatted}`;
+}
+
+/** crypto.randomUUID() is unavailable in non-secure contexts. */
+export function newId() {
+  try {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  } catch {
+    /* ignore */
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
