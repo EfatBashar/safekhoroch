@@ -24,7 +24,7 @@ import {
   type LoanType,
   type TxType,
 } from "@/lib/types";
-import { store } from "@/lib/store";
+import { newId, store } from "@/lib/store";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
 
@@ -79,7 +79,8 @@ function TxForm({ onDone }: { onDone: () => void }) {
     if (!n || n <= 0) return toast.error(t.enterValidAmount);
     if (!category) return toast.error(t.pickCategory);
     store.addTransaction({
-      id: crypto.randomUUID(),
+      id: newId(),
+      source: "manual",
       type,
       amount: n,
       category,
@@ -193,6 +194,7 @@ function TxForm({ onDone }: { onDone: () => void }) {
 function LoanForm({ onDone }: { onDone: () => void }) {
   const [type, setType] = useState<LoanType>("lend");
   const [person, setPerson] = useState("");
+  const [account, setAccount] = useState<Account>("cash");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState("");
@@ -204,13 +206,14 @@ function LoanForm({ onDone }: { onDone: () => void }) {
     if (!person.trim()) return toast.error(t.enterName);
     if (!n || n <= 0) return toast.error(t.enterValidAmount);
     store.addLoan({
-      id: crypto.randomUUID(),
+      id: newId(),
       type,
       person: person.trim(),
       amount: n,
       date: new Date(date).toISOString(),
       note: note || undefined,
       settled: false,
+      account,
     });
     toast.success(t.saved);
     onDone();
@@ -255,14 +258,28 @@ function LoanForm({ onDone }: { onDone: () => void }) {
           className="mt-1 h-14 text-2xl font-bold"
         />
       </div>
-      <div>
-        <Label>{t.date}</Label>
-        <Input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="mt-1"
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>{t.date}</Label>
+          <Input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>{t.account}</Label>
+          <Select value={account} onValueChange={(v) => setAccount(v as Account)}>
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cash">{t.cash}</SelectItem>
+              <SelectItem value="bank">{t.bank}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div>
         <Label>{t.note}</Label>
