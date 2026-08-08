@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
 import { dpsStore } from "@/lib/listStore";
-import { formatCurrency } from "@/lib/store";
+import { formatCurrency, newId, store } from "@/lib/store";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
 import { FabAdd } from "./budget";
 import { toast } from "sonner";
@@ -34,6 +34,7 @@ function DPSPage() {
         ) : (
           items.map((d) => {
             const mature = d.monthly * d.months;
+            const paidMonths = d.paidMonths ?? 0;
             return (
               <div key={d.id} className="rounded-2xl bg-card p-4 shadow-sm">
                 <div className="flex items-start justify-between">
@@ -50,6 +51,32 @@ function DPSPage() {
                 <div className="mt-2 rounded-xl bg-primary/5 px-3 py-2">
                   <p className="text-xs text-muted-foreground">{x.matureValue}</p>
                   <p className="font-display text-lg font-bold text-primary">{fc(mature)}</p>
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <p className="text-xs text-muted-foreground">
+                    {paidMonths}/{d.months} {x.installmentsPaid} · {fc(d.monthly * paidMonths)}
+                  </p>
+                  <Button
+                    size="sm"
+                    className="h-9 text-xs"
+                    disabled={paidMonths >= d.months}
+                    onClick={() => {
+                      store.addLinked({
+                        type: "expense",
+                        amount: d.monthly,
+                        category: "DPS",
+                        account: "bank",
+                        note: d.bank,
+                        date: new Date().toISOString(),
+                        source: "dps",
+                        refId: `${d.id}:${newId()}`,
+                      });
+                      dpsStore.update(d.id, { paidMonths: paidMonths + 1 });
+                      toast.success(t.saved);
+                    }}
+                  >
+                    {x.payInstallment}
+                  </Button>
                 </div>
               </div>
             );
@@ -86,7 +113,7 @@ function Form({ onDone }: { onDone: () => void }) {
     const b = parseInt(mo, 10);
     if (!bank.trim() || !a || a <= 0 || !b || b <= 0)
       return toast.error(t.enterValidAmount);
-    dpsStore.add({ id: crypto.randomUUID(), bank: bank.trim(), monthly: a, months: b });
+    dpsStore.add({ id: newId(), bank: bank.trim(), monthly: a, months: b, paidMonths: 0 });
     onDone();
   };
   return (
