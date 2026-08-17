@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Generic list store backed by localStorage with stable references
 // (avoids React error #185 from useSyncExternalStore).
