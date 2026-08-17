@@ -94,7 +94,223 @@ export type LedgerEntry = {
 export type Notification = { id: string; title: string; body: string; date: string; read: boolean };
 
 export const budgetStore = createListStore<Budget>("etracker.budgets.v1");
-export const savingsStore = createListStore<Savings>("etracker.savings.v1");
+const localSavingsStore =
+  createListStore<Savings>("etracker.savings.v1");
+
+export const savingsStore = {
+  get(): Savings[] {
+    return localSavingsStore.get();
+  },
+
+  async load(): Promise<Savings[]> {
+    const {
+      data: sessionData,
+    } = await supabase.auth.getSession();
+
+    const user =
+      sessionData.session?.user;
+
+    if (!user) {
+      return localSavingsStore.get();
+    }
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from("savings")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      console.error(
+        "[Savings] Supabase load failed:",
+        error
+      );
+
+      return localSavingsStore.get();
+    }
+
+    const savings: Savings[] =
+      (data ?? []).map((row) => ({
+        id: row.id,
+        goal: row.name,
+        target: Number(row.target_amount),
+        saved: Number(row.current_amount),
+      }));
+
+    /*
+     * Keep local cache synchronized
+     */
+    localStorage.setItem(
+      "etracker.savings.v1",
+      JSON.stringify(savings)
+    );
+
+    return savings;
+  },
+
+  add(item: Savings) {
+    localSavingsStore.add(item);
+
+    void (async () => {
+      const {
+        data: sessionData,
+      } = await supabase.auth.getSession();
+
+      const user =
+        sessionData.session?.user;
+
+      if (!user) {
+        console.error(
+          "[Savings] No authenticated user"
+        );
+        return;
+      }
+
+      const {
+        error,
+      } = await supabase
+        .from("savings")
+        .insert({
+          id: item.id,
+          user_id: user.id,
+          name: item.goal,
+          target_amount: item.target,
+          current_amount: item.saved,
+          target_date: null,
+          notes: null,
+          metadata: {},
+        });
+
+      if (error) {
+        console.error(
+          "[Savings] Supabase insert failed:",
+          error
+        );
+        return;
+      }
+
+      console.log(
+        "[Savings] Saved to Supabase:",
+        item.id
+      );
+    })();
+  },
+
+  update(
+    id: string,
+    patch: Partial<Savings>
+  ) {
+    localSavingsStore.update(
+      id,
+      patch
+    );
+
+    void (async () => {
+      const {
+        data: sessionData,
+      } = await supabase.auth.getSession();
+
+      const user =
+        sessionData.session?.user;
+
+      if (!user) return;
+
+      const current =
+        localSavingsStore
+          .get()
+          .find(
+            (item) =>
+              item.id === id
+          );
+
+      if (!current) return;
+
+      const {
+        error,
+      } = await supabase
+        .from("savings")
+        .update({
+          name: current.goal,
+          target_amount:
+            current.target,
+          current_amount:
+            current.saved,
+          updated_at:
+            new Date().toISOString(),
+        })
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error(
+          "[Savings] Supabase update failed:",
+          error
+        );
+      }
+    })();
+  },
+
+  remove(id: string) {
+    localSavingsStore.remove(id);
+
+    void (async () => {
+      const {
+        data: sessionData,
+      } = await supabase.auth.getSession();
+
+      const user =
+        sessionData.session?.user;
+
+      if (!user) return;
+
+      const {
+        error,
+      } = await supabase
+        .from("savings")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error(
+          "[Savings] Supabase delete failed:",
+          error
+        );
+      }
+    })();
+  },
+
+  use(): Savings[] {
+    const localItems =
+      localSavingsStore.use();
+
+    const [loaded, setLoaded] =
+      useState(false);
+
+    useEffect(() => {
+      let cancelled = false;
+
+      void this.load().then(() => {
+        if (!cancelled) {
+          setLoaded(true);
+        }
+      });
+
+      return () => {
+        cancelled = true;
+      };
+    }, []);
+
+    return loaded
+      ? localSavingsStore.get()
+      : localItems;
+  },
+};
 export const dpsStore = createListStore<DPS>("etracker.dps.v1");
 export const investmentStore = createListStore<Investment>("etracker.investments.v1");
 export const assetStore = createListStore<Asset>("etracker.assets.v1");
