@@ -1,14 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import type { Loan, Transaction, TxSource } from "./types";
 import { supabase } from "@/integrations/supabase/client";
 
-const TX_KEY = "etracker.transactions.v1";
-const LOAN_KEY = "etracker.loans.v1";
-const TX_MIGRATED_KEY = "etracker.transactions.supabase.migrated.v1";
+/* =========================================================
+   LOCAL CACHE HELPERS
+========================================================= */
 
 const cache: Record<string, unknown> = {};
-const EMPTY_TX: Transaction[] = [];
-const EMPTY_LOAN: Loan[] = [];
 
 function readLocal<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -33,315 +30,447 @@ function writeLocal(key: string, value: unknown) {
   }
 }
 
-const listeners = new Set<() => void>();
-function emit() {
-  listeners.forEach((l) => l());
+function useHydrated<T>(get: () => T, fallback: T, subscribe: (l: () => void) => () => void): T {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  const value = useSyncExternalStore(subscribe, get, () => fallback);
+  return hydrated ? value : fallback;
 }
 
-let txLoadStarted = false;
-let txLoadPromise: Promise<void> | null = null;
+/* =========================================================
+   GENERIC SUPABASE-BACKED ENTITY STORE
+   Every item type gets: get(), use(), add(), update(), remove()
+   Local writes are optimistic; every mutation is also pushed
+   to the matching Supabase table so data survives reloads and
+   syncs across devices.
+========================================================= */
 
-function txToRow(tx: Transaction, userId: string) {
+type WithId = { id: string };
+
+function makeEntityStore<TItem extends WithId>(opts: {
+  key: string;
+  table: string;
+  toRow: (item: TItem, userId: string) => Record<string, unknown>;
+  fromRow: (row: Record<string, unknown>) => TItem;
+}) {
+  const { key, table, toRow, fromRow } = opts;
+  const migratedKey = `${key}.supabase.migrated.v1`;
+  const listeners = new Set<() => void>();
+  let loadStarted = false;
+
+  function emit() {
+    listeners.forEach((l) => l());
+  }
+
+  function readAll(): TItem[] {
+    return readLocal<TItem[]>(key, []);
+  }
+
+  function writeAll(items: TItem[]) {
+    writeLocal(key, items);
+  }
+
+  async function loadFromSupabase() {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData.session?.user;
+    if (!user) return;
+
+    const { data, error } = await (supabase.from(table as never) as any)
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(`[${table}] Supabase load failed:`, error);
+      return;
+    }
+
+    const cloudItems = ((data ?? []) as Record<string, unknown>[]).map(fromRow);
+    const localItems = readAll();
+
+    // One-time migration: if the cloud table is empty but local has data,
+    // upload the local copy so nothing already entered gets lost.
+    if (cloudItems.length === 0 && localItems.length > 0 && localStorage.getItem(migratedKey) !== user.id) {
+      const rows = localItems.map((it) => toRow(it, user.id));
+      const { error: migrationError } = await (supabase.from(table as never) as any).upsert(rows, {
+        onConflict: "id",
+      });
+
+      if (!migrationError) {
+        localStorage.setItem(migratedKey, user.id);
+        emit();
+        return;
+      }
+      console.error(`[${table}] Local migration failed:`, migrationError);
+    }
+
+    writeAll(cloudItems);
+    localStorage.setItem(migratedKey, user.id);
+    emit();
+  }
+
+  function ensureLoad() {
+    if (loadStarted) return;
+    loadStarted = true;
+    void loadFromSupabase().catch((error) => {
+      console.error(`[${table}] Cloud sync failed:`, error);
+    });
+  }
+
+  if (typeof window !== "undefined") {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      loadStarted = false;
+      if (session?.user) {
+        void loadFromSupabase();
+        loadStarted = true;
+      } else {
+        writeAll([]);
+        emit();
+      }
+    });
+  }
+
   return {
-    id: tx.id,
-    user_id: userId,
-    type: tx.type,
-    amount: tx.amount,
-    category: tx.category ?? null,
-    account: tx.account ?? null,
-    description: tx.note ?? null,
-    transaction_date: tx.date.slice(0, 10),
-    metadata: {
-      source: tx.source ?? "manual",
-      refId: tx.refId ?? null,
+    get(): TItem[] {
+      ensureLoad();
+      return readAll();
+    },
+
+    use(): TItem[] {
+      return useHydrated(
+        () => {
+          ensureLoad();
+          return readAll();
+        },
+        [] as TItem[],
+        (l) => {
+          listeners.add(l);
+          return () => listeners.delete(l);
+        },
+      );
+    },
+
+    add(item: TItem) {
+      const all = [item, ...readAll()];
+      writeAll(all);
+      emit();
+
+      void (async () => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
+        if (!user) {
+          console.error(`[${table}] No authenticated user`);
+          return;
+        }
+        const { error } = await (supabase.from(table as never) as any).upsert(toRow(item, user.id), {
+          onConflict: "id",
+        });
+        if (error) console.error(`[${table}] Supabase insert failed:`, error);
+      })();
+    },
+
+    update(id: string, patch: Partial<TItem>) {
+      const all = readAll().map((it) => (it.id === id ? { ...it, ...patch } : it));
+      writeAll(all);
+      emit();
+
+      const updated = all.find((it) => it.id === id);
+      if (!updated) return;
+
+      void (async () => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
+        if (!user) return;
+        const { error } = await (supabase.from(table as never) as any)
+          .update(toRow(updated, user.id))
+          .eq("id", id)
+          .eq("user_id", user.id);
+        if (error) console.error(`[${table}] Supabase update failed:`, error);
+      })();
+    },
+
+    remove(id: string) {
+      const all = readAll().filter((it) => it.id !== id);
+      writeAll(all);
+      emit();
+
+      void (async () => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const user = sessionData.session?.user;
+        if (!user) return;
+        const { error } = await (supabase.from(table as never) as any)
+          .delete()
+          .eq("id", id)
+          .eq("user_id", user.id);
+        if (error) console.error(`[${table}] Supabase delete failed:`, error);
+      })();
+    },
+
+    subscribe(l: () => void) {
+      listeners.add(l);
+      return () => listeners.delete(l);
     },
   };
 }
 
-function rowToTx(row: {
-  id: string;
-  type: string;
-  amount: number;
-  category: string | null;
-  account: string | null;
-  description: string | null;
-  transaction_date: string;
-  metadata: unknown;
-}): Transaction {
-  const metadata =
-    row.metadata && typeof row.metadata === "object"
-      ? (row.metadata as Record<string, unknown>)
-      : {};
+/* =========================================================
+   ITEM TYPES
+========================================================= */
 
-  const source = metadata.source;
-  const refId = metadata.refId;
+export type MarketItem = { id: string; name: string; qty: string; bought: boolean; price: number };
+export type BillItem = { id: string; name: string; amount: number; dueDay: number; paid: boolean };
+export type SavingsItem = { id: string; goal: string; target: number; saved: number };
+export type DpsItem = { id: string; bank: string; monthly: number; months: number; paidMonths: number };
+export type MedicineItem = { id: string; name: string; dose: string; taken: boolean };
+export type FamilyItem = { id: string; name: string; relation: string };
+export type BudgetItem = { id: string; category: string; limit: number };
+export type NotificationItem = { id: string; title: string; body: string; date: string; read: boolean };
+export type AssetItem = { id: string; name: string; type: string; value: number };
+export type InvestmentItem = { id: string; name: string; amount: number; note?: string };
+export type LedgerItem = { id: string; shop: string; amount: number; type: "credit" | "paid"; date: string };
 
-  return {
-    id: row.id,
-    type: row.type as Transaction["type"],
-    amount: Number(row.amount),
-    category: row.category ?? "Other",
-    account: (row.account === "bank" ? "bank" : "cash") as Transaction["account"],
-    note: row.description ?? undefined,
-    date: row.transaction_date,
-    source:
-      source === "loan" ||
-      source === "market" ||
-      source === "savings" ||
-      source === "dps" ||
-      source === "bill" ||
-      source === "manual"
-        ? source
-        : "manual",
-    refId: typeof refId === "string" ? refId : undefined,
-  };
-}
+/* =========================================================
+   STORES
+========================================================= */
 
-async function loadTransactionsFromSupabase() {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData.session?.user;
+export const marketStore = makeEntityStore<MarketItem>({
+  key: "etracker.market.v1",
+  table: "market",
+  toRow: (m, userId) => ({
+    id: m.id,
+    user_id: userId,
+    name: m.name,
+    category: null,
+    quantity: 1,
+    unit: m.qty || null,
+    price: m.price,
+    total_amount: m.price,
+    purchased_at: new Date().toISOString().slice(0, 10),
+    notes: null,
+    metadata: { bought: m.bought },
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    qty: (row.unit as string) ?? "",
+    bought: !!(row.metadata as Record<string, unknown> | null)?.bought,
+    price: Number(row.price ?? 0),
+  }),
+});
 
-  if (!user) return;
+export const billStore = makeEntityStore<BillItem>({
+  key: "etracker.bills.v1",
+  table: "bills",
+  toRow: (b, userId) => ({
+    id: b.id,
+    user_id: userId,
+    title: b.name,
+    category: null,
+    amount: b.amount,
+    due_date: null,
+    status: b.paid ? "paid" : "pending",
+    recurring: true,
+    notes: null,
+    metadata: { dueDay: b.dueDay },
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.title as string) ?? "",
+    amount: Number(row.amount ?? 0),
+    dueDay: Number((row.metadata as Record<string, unknown> | null)?.dueDay ?? 1),
+    paid: row.status === "paid",
+  }),
+});
 
-  const { data, error } = await supabase
-    .from("transactions")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("transaction_date", { ascending: false })
-    .order("created_at", { ascending: false });
+export const savingsStore = makeEntityStore<SavingsItem>({
+  key: "etracker.savings.v1",
+  table: "savings",
+  toRow: (s, userId) => ({
+    id: s.id,
+    user_id: userId,
+    name: s.goal,
+    target_amount: s.target,
+    current_amount: s.saved,
+    target_date: null,
+    notes: null,
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    goal: (row.name as string) ?? "",
+    target: Number(row.target_amount ?? 0),
+    saved: Number(row.current_amount ?? 0),
+  }),
+});
 
-  if (error) {
-    console.error("[Transactions] Supabase load failed:", error);
-    return;
-  }
+export const dpsStore = makeEntityStore<DpsItem>({
+  key: "etracker.dps.v1",
+  table: "dps",
+  toRow: (d, userId) => ({
+    id: d.id,
+    user_id: userId,
+    name: d.bank,
+    monthly_amount: d.monthly,
+    total_deposit: d.monthly * d.paidMonths,
+    maturity_amount: d.monthly * d.months,
+    start_date: null,
+    maturity_date: null,
+    installment_count: d.months,
+    paid_installments: d.paidMonths,
+    status: d.paidMonths >= d.months ? "matured" : "active",
+    notes: null,
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    bank: (row.name as string) ?? "",
+    monthly: Number(row.monthly_amount ?? 0),
+    months: Number(row.installment_count ?? 0),
+    paidMonths: Number(row.paid_installments ?? 0),
+  }),
+});
 
-  const cloudTransactions = (data ?? []).map(rowToTx);
-  const localTransactions = readLocal<Transaction[]>(TX_KEY, EMPTY_TX);
+export const medicineStore = makeEntityStore<MedicineItem>({
+  key: "etracker.medicine.v1",
+  table: "medicine",
+  toRow: (m, userId) => ({
+    id: m.id,
+    user_id: userId,
+    name: m.name,
+    dosage: m.dose || null,
+    quantity: null,
+    schedule: null,
+    start_date: null,
+    end_date: null,
+    notes: null,
+    metadata: { taken: m.taken },
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    dose: (row.dosage as string) ?? "",
+    taken: !!(row.metadata as Record<string, unknown> | null)?.taken,
+  }),
+});
 
-  // One-time migration: if the cloud account is empty, preserve existing
-  // LocalStorage transactions by uploading them before using the cloud list.
-  if (
-    cloudTransactions.length === 0 &&
-    localTransactions.length > 0 &&
-    localStorage.getItem(TX_MIGRATED_KEY) !== user.id
-  ) {
-    const rows = localTransactions.map((tx) => txToRow(tx, user.id));
-    const { error: migrationError } = await supabase
-      .from("transactions")
-      .upsert(rows, { onConflict: "id" });
+export const familyStore = makeEntityStore<FamilyItem>({
+  key: "etracker.family.v1",
+  table: "family",
+  toRow: (f, userId) => ({
+    id: f.id,
+    user_id: userId,
+    name: f.name,
+    relation: f.relation || null,
+    phone: null,
+    email: null,
+    notes: null,
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    relation: (row.relation as string) ?? "",
+  }),
+});
 
-    if (!migrationError) {
-      localStorage.setItem(TX_MIGRATED_KEY, user.id);
-      cache[TX_KEY] = localTransactions;
-      emit();
-      return;
-    }
+export const budgetStore = makeEntityStore<BudgetItem>({
+  key: "etracker.budgets.v1",
+  table: "budgets",
+  toRow: (b, userId) => ({
+    id: b.id,
+    user_id: userId,
+    category: b.category,
+    limit_amount: b.limit,
+    spent_amount: 0,
+    period: "monthly",
+    start_date: null,
+    end_date: null,
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    category: (row.category as string) ?? "",
+    limit: Number(row.limit_amount ?? 0),
+  }),
+});
 
-    console.error("[Transactions] Local migration failed:", migrationError);
-  }
+export const notificationStore = makeEntityStore<NotificationItem>({
+  key: "etracker.notifications.v1",
+  table: "notifications",
+  toRow: (n, userId) => ({
+    id: n.id,
+    user_id: userId,
+    title: n.title,
+    message: n.body,
+    type: "info",
+    read: n.read,
+    read_at: n.read ? new Date().toISOString() : null,
+    metadata: { date: n.date },
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    title: (row.title as string) ?? "",
+    body: (row.message as string) ?? "",
+    date: ((row.metadata as Record<string, unknown> | null)?.date as string) ?? (row.created_at as string),
+    read: !!row.read,
+  }),
+});
 
-  writeLocal(TX_KEY, cloudTransactions);
-  localStorage.setItem(TX_MIGRATED_KEY, user.id);
-  emit();
-}
+export const assetStore = makeEntityStore<AssetItem>({
+  key: "etracker.assets.v1",
+  table: "assets",
+  toRow: (a, userId) => ({
+    id: a.id,
+    user_id: userId,
+    name: a.name,
+    type: a.type || null,
+    value: a.value,
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    type: (row.type as string) ?? "",
+    value: Number(row.value ?? 0),
+  }),
+});
 
-function ensureTransactionLoad() {
-  if (txLoadStarted) return;
-  txLoadStarted = true;
-  txLoadPromise = loadTransactionsFromSupabase().catch((error) => {
-    console.error("[Transactions] Cloud sync failed:", error);
-  });
-}
+export const investmentStore = makeEntityStore<InvestmentItem>({
+  key: "etracker.investments.v1",
+  table: "investments",
+  toRow: (i, userId) => ({
+    id: i.id,
+    user_id: userId,
+    name: i.name,
+    amount: i.amount,
+    note: i.note ?? null,
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    amount: Number(row.amount ?? 0),
+    note: (row.note as string) ?? undefined,
+  }),
+});
 
-const listenersWithAuth = () => {
-  supabase.auth.onAuthStateChange((_event, session) => {
-    txLoadStarted = false;
-    txLoadPromise = null;
-
-    if (session?.user) {
-      void loadTransactionsFromSupabase();
-      txLoadStarted = true;
-    } else {
-      cache[TX_KEY] = [];
-      emit();
-    }
-  });
-};
-
-if (typeof window !== "undefined") {
-  void listenersWithAuth();
-}
-
-export const store = {
-  getTransactions(): Transaction[] {
-    ensureTransactionLoad();
-    return readLocal<Transaction[]>(TX_KEY, EMPTY_TX);
-  },
-
-  getLoans(): Loan[] {
-    return readLocal<Loan[]>(LOAN_KEY, EMPTY_LOAN);
-  },
-
-  addTransaction(tx: Transaction) {
-    // Optimistic UI update; cloud write happens immediately after.
-    const all = [tx, ...store.getTransactions()];
-    writeLocal(TX_KEY, all);
-    emit();
-
-    void (async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-
-      if (!user) return;
-
-      const { error } = await supabase
-        .from("transactions")
-        .upsert(txToRow(tx, user.id), { onConflict: "id" });
-
-      if (error) {
-        console.error("[Transactions] Supabase insert failed:", error);
-        return;
-      }
-
-      localStorage.setItem(TX_MIGRATED_KEY, user.id);
-    })();
-  },
-
-  deleteTransaction(id: string) {
-    const all = store.getTransactions().filter((t) => t.id !== id);
-    writeLocal(TX_KEY, all);
-    emit();
-
-    void (async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-
-      if (!user) return;
-
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", user.id);
-
-      if (error) {
-        console.error("[Transactions] Supabase delete failed:", error);
-      }
-    })();
-  },
-
-  addLinked(tx: Omit<Transaction, "id"> & { source: TxSource; refId: string }) {
-    store.addTransaction({ id: newId(), ...tx });
-  },
-
-  removeByRef(refId: string) {
-    const all = store.getTransactions().filter((t) => t.refId !== refId);
-    const removedIds = store.getTransactions()
-      .filter((t) => t.refId === refId)
-      .map((t) => t.id);
-
-    writeLocal(TX_KEY, all);
-    emit();
-
-    void (async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const user = sessionData.session?.user;
-      if (!user || removedIds.length === 0) return;
-
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .in("id", removedIds)
-        .eq("user_id", user.id);
-
-      if (error) {
-        console.error("[Transactions] Linked transaction delete failed:", error);
-      }
-    })();
-  },
-
-  addLoan(loan: Loan) {
-    const all = [loan, ...store.getLoans()];
-    writeLocal(LOAN_KEY, all);
-    store.addLinked({
-      type: loan.type === "borrow" ? "income" : "expense",
-      amount: loan.amount,
-      category: loan.type === "borrow" ? "Borrowed" : "Lent",
-      account: loan.account ?? "cash",
-      note: loan.person,
-      date: loan.date,
-      source: "loan",
-      refId: loan.id,
-    });
-  },
-
-  toggleLoan(id: string) {
-    const loan = store.getLoans().find((l) => l.id === id);
-    if (!loan) return;
-    const settled = !loan.settled;
-    const all = store.getLoans().map((l) => (l.id === id ? { ...l, settled } : l));
-    writeLocal(LOAN_KEY, all);
-
-    const settleRef = `${id}:settle`;
-    if (settled) {
-      store.addLinked({
-        type: loan.type === "borrow" ? "expense" : "income",
-        amount: loan.amount,
-        category: loan.type === "borrow" ? "Loan repaid" : "Loan recovered",
-        account: loan.account ?? "cash",
-        note: loan.person,
-        date: new Date().toISOString(),
-        source: "loan",
-        refId: settleRef,
-      });
-    } else {
-      store.removeByRef(settleRef);
-    }
-    emit();
-  },
-
-  deleteLoan(id: string) {
-    const all = store.getLoans().filter((l) => l.id !== id);
-    writeLocal(LOAN_KEY, all);
-    store.removeByRef(id);
-    store.removeByRef(`${id}:settle`);
-    emit();
-  },
-
-  subscribe(l: () => void) {
-    listeners.add(l);
-    return () => listeners.delete(l);
-  },
-};
-
-function useHydrated<T>(get: () => T, fallback: T): T {
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
-  const value = useSyncExternalStore(store.subscribe, get, () => fallback);
-  return hydrated ? value : fallback;
-}
-
-export function useTransactions() {
-  return useHydrated(store.getTransactions, [] as Transaction[]);
-}
-
-export function useLoans() {
-  return useHydrated(store.getLoans, [] as Loan[]);
-}
-
-export function formatCurrency(n: number, lang: "en" | "bn" = "en") {
-  const locale = lang === "bn" ? "bn-BD" : "en-BD";
-  const formatted = new Intl.NumberFormat(locale, {
-    maximumFractionDigits: 0,
-  }).format(Math.abs(n));
-  return `${n < 0 ? "−" : ""}৳${formatted}`;
-}
-
-export function newId() {
-  try {
-    if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-  } catch {
-    /* ignore */
-  }
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
+export const ledgerStore = makeEntityStore<LedgerItem>({
+  key: "etracker.ledger.v1",
+  table: "ledger_entries",
+  toRow: (l, userId) => ({
+    id: l.id,
+    user_id: userId,
+    shop: l.shop,
+    amount: l.amount,
+    type: l.type,
+    entry_date: l.date.slice(0, 10),
+    metadata: {},
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    shop: (row.shop as string) ?? "",
+    amount: Number(row.amount ?? 0),
+    type: row.type === "paid" ? "paid" : "credit",
+    date: (row.entry_date as string) ?? new Date().toISOString().slice(0, 10),
+  }),
+});
