@@ -138,6 +138,24 @@ export type Database = {
         Update: { id?: string; user_id?: string; title?: string; message?: string; type?: string; read?: boolean; read_at?: string | null; metadata?: Json; created_at?: string }
         Relationships: []
       }
+      assets: {
+        Row: { id: string; user_id: string; name: string; type: string | null; value: number; metadata: Json; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; name: string; type?: string | null; value?: number; metadata?: Json; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; name?: string; type?: string | null; value?: number; metadata?: Json; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
+      investments: {
+        Row: { id: string; user_id: string; name: string; amount: number; note: string | null; metadata: Json; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; name: string; amount?: number; note?: string | null; metadata?: Json; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; name?: string; amount?: number; note?: string | null; metadata?: Json; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
+      ledger_entries: {
+        Row: { id: string; user_id: string; shop: string; amount: number; type: string; entry_date: string; metadata: Json; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; shop: string; amount?: number; type?: string; entry_date?: string; metadata?: Json; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; shop?: string; amount?: number; type?: string; entry_date?: string; metadata?: Json; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: {
