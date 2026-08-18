@@ -83,6 +83,7 @@ function TasksPage() {
         />
         <Button
           type="submit"
+          disabled={!input.trim()}
           onClick={(e) => {
             e.preventDefault();
             add();
