@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -8,6 +9,11 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { name: "theme-color", content: "#16a34a" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Safe Khoroch" },
       { title: "Safe Khoroch — Personal Work & Expense Tracker" },
       { name: "description", content: "Track income, expenses, works, accounts, and loans in a clean mobile-first dashboard." },
       { property: "og:title", content: "Safe Khoroch — Personal Work & Expense Tracker" },
@@ -21,6 +27,9 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "icon", href: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -54,10 +63,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Toaster position="top-center" />
+        <PwaRegister />
         <Scripts />
       </body>
     </html>
   );
+}
+
+function PwaRegister() {
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.error("Service worker registration failed:", err);
+    });
+  }, []);
+  return null;
 }
 
 import { AppShell } from "@/components/AppShell";
