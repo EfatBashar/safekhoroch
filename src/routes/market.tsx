@@ -1,11 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { ShoppingBasket, Check, Trash2 } from "lucide-react";
+import { ShoppingBasket, Check, Trash2, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
-import { marketStore } from "@/lib/listStore";
+import { marketStore, type MarketItem } from "@/lib/listStore";
 import { formatCurrency, newId, store } from "@/lib/store";
 import { useRegisterFab } from "@/lib/fab";
 import { PageHeader, EmptyState } from "@/components/PageHeader";
@@ -27,6 +34,36 @@ function MarketPage() {
   const spent = items
     .filter((m) => m.bought)
     .reduce((sum, m) => sum + (m.price ?? 0), 0);
+
+  const [editing, setEditing] = useState<MarketItem | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editQty, setEditQty] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+
+  const openEdit = (m: MarketItem) => {
+    setEditing(m);
+    setEditName(m.name);
+    setEditQty(m.qty);
+    setEditPrice(m.price ? String(m.price) : "");
+  };
+
+  const saveEdit = () => {
+    if (!editing) return;
+    if (!editName.trim()) return;
+    marketStore.update(editing.id, {
+      name: editName.trim(),
+      qty: editQty.trim(),
+      price: parseFloat(editPrice) || 0,
+    });
+    setEditing(null);
+  };
+
+  const deleteEditing = () => {
+    if (!editing) return;
+    store.removeByRef(editing.id);
+    marketStore.remove(editing.id);
+    setEditing(null);
+  };
 
   const toggleBought = (m: (typeof items)[number]) => {
     const bought = !m.bought;
@@ -121,10 +158,16 @@ function MarketPage() {
                 >
                   {m.bought && <Check className="h-4 w-4" strokeWidth={3} />}
                 </button>
-                <span className={`flex-1 text-sm ${m.bought ? "line-through text-muted-foreground" : ""}`}>
+                <button
+                  onClick={() => openEdit(m)}
+                  className={`flex-1 text-left text-sm ${m.bought ? "line-through text-muted-foreground" : ""}`}
+                >
                   {m.name} {m.qty && <span className="text-muted-foreground">· {m.qty}</span>}
                   {!!m.price && <span className="ml-1 font-semibold">· {fc(m.price)}</span>}
-                </span>
+                </button>
+                <button onClick={() => openEdit(m)} aria-label={lang === "bn" ? "সম্পাদনা" : "Edit"}>
+                  <Pencil className="h-4 w-4 text-muted-foreground" />
+                </button>
                 <button
                   onClick={() => {
                     store.removeByRef(m.id);
@@ -139,6 +182,46 @@ function MarketPage() {
           </ul>
         )}
       </div>
+
+      <Sheet open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>{lang === "bn" ? "আইটেম সম্পাদনা" : "Edit item"}</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 flex flex-col gap-3">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder={t.name}
+              className="h-12 rounded-xl"
+            />
+            <div className="flex gap-2">
+              <Input
+                value={editQty}
+                onChange={(e) => setEditQty(e.target.value)}
+                placeholder={x.qty}
+                className="h-12 flex-1 rounded-xl"
+              />
+              <Input
+                type="number"
+                inputMode="decimal"
+                value={editPrice}
+                onChange={(e) => setEditPrice(e.target.value)}
+                placeholder={x.price}
+                className="h-12 flex-1 rounded-xl"
+              />
+            </div>
+          </div>
+          <SheetFooter className="mt-4 flex-row gap-2">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={deleteEditing}>
+              {t.delete}
+            </Button>
+            <Button className="flex-1 rounded-xl" onClick={saveEdit}>
+              {t.save}
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
