@@ -156,6 +156,12 @@ export type Database = {
         Update: { id?: string; user_id?: string; shop?: string; amount?: number; type?: string; entry_date?: string; metadata?: Json; created_at?: string; updated_at?: string }
         Relationships: []
       }
+      custom_categories: {
+        Row: { id: string; user_id: string; name: string; type: string; created_at: string }
+        Insert: { id?: string; user_id: string; name: string; type?: string; created_at?: string }
+        Update: { id?: string; user_id?: string; name?: string; type?: string; created_at?: string }
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: {
