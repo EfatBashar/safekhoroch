@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { formatCurrency, useTransactions } from "@/lib/store";
 import { summary, monthlyBuckets } from "@/lib/calc";
-import { Wallet, Landmark } from "lucide-react";
+import { Wallet, Landmark, Smartphone } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import {
   ResponsiveContainer,
@@ -46,6 +46,24 @@ function AccountsPage() {
           icon={<Landmark className="h-5 w-5" />}
           label={t.bankAccount}
           value={fc(s.bank)}
+        />
+        <AccountCard
+          tone="mobile"
+          icon={<Smartphone className="h-5 w-5" />}
+          label={t.bkash}
+          value={fc(s.balances.bkash)}
+        />
+        <AccountCard
+          tone="mobile"
+          icon={<Smartphone className="h-5 w-5" />}
+          label={t.nagad}
+          value={fc(s.balances.nagad)}
+        />
+        <AccountCard
+          tone="mobile"
+          icon={<Smartphone className="h-5 w-5" />}
+          label={t.rocket}
+          value={fc(s.balances.rocket)}
         />
       </div>
 
@@ -102,7 +120,7 @@ function AccountCard({
   label,
   value,
 }: {
-  tone: "cash" | "balance";
+  tone: "cash" | "balance" | "mobile";
   icon: React.ReactNode;
   label: string;
   value: string;
@@ -110,7 +128,9 @@ function AccountCard({
   const cls =
     tone === "cash"
       ? "bg-cash text-cash-foreground"
-      : "bg-balance text-balance-foreground";
+      : tone === "balance"
+        ? "bg-balance text-balance-foreground"
+        : "bg-primary/10 text-foreground";
   return (
     <div
       className={`flex items-center justify-between rounded-2xl p-4 ${cls}`}
