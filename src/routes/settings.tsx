@@ -17,8 +17,11 @@ import {
   MessageSquare,
   ShieldCheck,
   Bell,
+  Moon,
 } from "lucide-react";
 import { remindersEnabled, setRemindersEnabled, requestNotificationPermission } from "@/lib/reminders";
+import { getTheme, setTheme, type Theme } from "@/lib/theme";
+import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -31,7 +34,7 @@ export const Route = createFileRoute("/settings")({
 });
 
 function SettingsPage() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const x = useTx();
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
@@ -39,8 +42,16 @@ function SettingsPage() {
   const [fbMsg, setFbMsg] = useState("");
   const [fullName, setFullName] = useState<string>("");
   const [notifOn, setNotifOn] = useState(false);
+  const [darkOn, setDarkOn] = useState(false);
 
   useEffect(() => setNotifOn(remindersEnabled()), []);
+  useEffect(() => setDarkOn(getTheme() === "dark"), []);
+
+  const toggleDark = (checked: boolean) => {
+    const next: Theme = checked ? "dark" : "light";
+    setTheme(next);
+    setDarkOn(checked);
+  };
 
   const toggleNotif = async () => {
     if (notifOn) {
@@ -169,6 +180,11 @@ function SettingsPage() {
           subtitle={notifOn ? x.notifOn : ""}
           onClick={toggleNotif}
         />
+        <Row
+          icon={<Moon className={`h-5 w-5 ${darkOn ? "text-primary" : "text-muted-foreground"}`} />}
+          title={lang === "bn" ? "ডার্ক মোড" : "Dark mode"}
+          right={<Switch checked={darkOn} onCheckedChange={toggleDark} />}
+        />
         <Row icon={<Shield className="h-5 w-5 text-teal-600" />} title={t.privacyPolicy} onClick={() => toast.info(t.comingSoon)} />
         <Row icon={<KeyRound className="h-5 w-5 text-blue-600" />} title={t.changePassword} onClick={() => toast.info(t.comingSoon)} />
         {user ? (
@@ -228,15 +244,33 @@ function Section({ title, children, danger }: { title: string; children: React.R
   );
 }
 
-function Row({ icon, title, subtitle, onClick, danger }: { icon: React.ReactNode; title: string; subtitle?: string; onClick?: () => void; danger?: boolean }) {
+function Row({
+  icon,
+  title,
+  subtitle,
+  onClick,
+  danger,
+  right,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  onClick?: () => void;
+  danger?: boolean;
+  right?: React.ReactNode;
+}) {
+  const Comp = right ? "div" : "button";
   return (
-    <button onClick={onClick} className="flex w-full items-center gap-4 px-5 py-3.5 text-left active:bg-muted">
+    <Comp
+      onClick={right ? undefined : onClick}
+      className="flex w-full items-center gap-4 px-5 py-3.5 text-left active:bg-muted"
+    >
       <div className="shrink-0">{icon}</div>
       <div className="min-w-0 flex-1">
         <p className={`text-sm font-bold ${danger ? "text-destructive" : "text-foreground"}`}>{title}</p>
         {subtitle && <p className={`text-xs ${danger ? "text-destructive/80" : "text-muted-foreground"}`}>{subtitle}</p>}
       </div>
-      <ChevronRight className={`h-4 w-4 ${danger ? "text-destructive" : "text-muted-foreground"}`} />
-    </button>
+      {right ?? <ChevronRight className={`h-4 w-4 ${danger ? "text-destructive" : "text-muted-foreground"}`} />}
+    </Comp>
   );
 }
