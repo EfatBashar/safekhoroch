@@ -25,8 +25,11 @@ import {
   type TxType,
 } from "@/lib/types";
 import { newId, store } from "@/lib/store";
+import { categoryStore } from "@/lib/listStore";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n";
+import { useTx } from "@/lib/i18nExtra";
+import { Plus } from "lucide-react";
 
 export function AddSheet({
   open,
@@ -70,8 +73,29 @@ function TxForm({ onDone }: { onDone: () => void }) {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [note, setNote] = useState("");
   const { t, tc } = useT();
+  const x = useTx();
+  const customCats = categoryStore.use();
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
-  const cats = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const builtIn = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const custom = customCats.filter((c) => c.type === type).map((c) => c.name);
+  const cats = [...builtIn.filter((c) => c !== "Other"), ...custom, "Other"];
+
+  const confirmNewCategory = () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    if (cats.some((c) => c.toLowerCase() === name.toLowerCase())) {
+      setCategory(name);
+      setAddingCategory(false);
+      setNewCategoryName("");
+      return;
+    }
+    categoryStore.add({ id: newId(), name, type });
+    setCategory(name);
+    setAddingCategory(false);
+    setNewCategoryName("");
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,7 +166,7 @@ function TxForm({ onDone }: { onDone: () => void }) {
             <SelectContent>
               {cats.map((c) => (
                 <SelectItem key={c} value={c}>
-                  {tc(c)}
+                  {custom.includes(c) ? c : tc(c)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -157,10 +181,54 @@ function TxForm({ onDone }: { onDone: () => void }) {
             <SelectContent>
               <SelectItem value="cash">{t.cash}</SelectItem>
               <SelectItem value="bank">{t.bank}</SelectItem>
+              <SelectItem value="bkash">{t.bkash}</SelectItem>
+              <SelectItem value="nagad">{t.nagad}</SelectItem>
+              <SelectItem value="rocket">{t.rocket}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
+
+      {addingCategory ? (
+        <div className="flex gap-2">
+          <Input
+            autoFocus
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            placeholder={t.category}
+            className="h-10 flex-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                confirmNewCategory();
+              }
+            }}
+          />
+          <Button type="button" size="sm" className="h-10" onClick={confirmNewCategory}>
+            {t.save}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-10"
+            onClick={() => {
+              setAddingCategory(false);
+              setNewCategoryName("");
+            }}
+          >
+            {x.cancel}
+          </Button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setAddingCategory(true)}
+          className="flex items-center gap-1.5 text-xs font-semibold text-primary"
+        >
+          <Plus className="h-3.5 w-3.5" /> {t.category}
+        </button>
+      )}
 
       <div>
         <Label htmlFor="date">{t.date}</Label>
@@ -277,6 +345,9 @@ function LoanForm({ onDone }: { onDone: () => void }) {
             <SelectContent>
               <SelectItem value="cash">{t.cash}</SelectItem>
               <SelectItem value="bank">{t.bank}</SelectItem>
+              <SelectItem value="bkash">{t.bkash}</SelectItem>
+              <SelectItem value="nagad">{t.nagad}</SelectItem>
+              <SelectItem value="rocket">{t.rocket}</SelectItem>
             </SelectContent>
           </Select>
         </div>
