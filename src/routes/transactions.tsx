@@ -5,8 +5,13 @@ import { summary } from "@/lib/calc";
 import { ArrowDownRight, ArrowUpRight, Receipt, Plus, Trash2, List, ArrowDown, ArrowUp, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useT } from "@/lib/i18n";
+import { useT, type Dict } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
+import type { Account } from "@/lib/types";
+
+function accountLabel(account: Account, t: Dict) {
+  return t[account] ?? t.cash;
+}
 
 export const Route = createFileRoute("/transactions")({
   head: () => ({
@@ -189,7 +194,7 @@ function TransactionsPage() {
                       <div>
                         <p className="text-sm font-semibold">{tc(tx.category)}</p>
                         <p className="text-[11px] text-muted-foreground">
-                          {tx.note ?? (tx.account === "cash" ? t.cash : t.bank)}
+                          {tx.note ?? accountLabel(tx.account, t)}
                         </p>
                       </div>
                     </div>
