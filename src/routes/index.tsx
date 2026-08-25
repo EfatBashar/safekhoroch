@@ -86,7 +86,7 @@ function Dashboard() {
       <div className="mt-3 flex items-center justify-between rounded-2xl bg-balance px-4 py-3 text-balance-foreground">
         <div>
           <p className="text-[11px] font-semibold opacity-80">{x.available}</p>
-          <p className="font-display text-2xl font-bold">{fc(s.cash + s.bank)}</p>
+          <p className="font-display text-2xl font-bold">{fc(s.balance)}</p>
         </div>
         <div className="text-right">
           <p className="text-[11px] font-semibold opacity-80">{x.savedTotal}</p>
