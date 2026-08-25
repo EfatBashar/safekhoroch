@@ -228,6 +228,7 @@ export type NotificationItem = { id: string; title: string; body: string; date: 
 export type AssetItem = { id: string; name: string; type: string; value: number };
 export type InvestmentItem = { id: string; name: string; amount: number; note?: string };
 export type LedgerItem = { id: string; shop: string; amount: number; type: "credit" | "paid"; date: string };
+export type CustomCategory = { id: string; name: string; type: "income" | "expense" };
 
 /* =========================================================
    STORES
@@ -472,5 +473,21 @@ export const ledgerStore = makeEntityStore<LedgerItem>({
     amount: Number(row.amount ?? 0),
     type: row.type === "paid" ? "paid" : "credit",
     date: (row.entry_date as string) ?? new Date().toISOString().slice(0, 10),
+  }),
+});
+
+export const categoryStore = makeEntityStore<CustomCategory>({
+  key: "etracker.customCategories.v1",
+  table: "custom_categories",
+  toRow: (c, userId) => ({
+    id: c.id,
+    user_id: userId,
+    name: c.name,
+    type: c.type,
+  }),
+  fromRow: (row) => ({
+    id: row.id as string,
+    name: (row.name as string) ?? "",
+    type: row.type === "income" ? "income" : "expense",
   }),
 });
