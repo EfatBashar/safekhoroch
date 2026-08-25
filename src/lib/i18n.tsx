@@ -112,6 +112,9 @@ type Strings = {
   account: string;
   cash: string;
   bank: string;
+  bkash: string;
+  nagad: string;
+  rocket: string;
   date: string;
   noteOptional: string;
   note: string;
@@ -303,6 +306,9 @@ const dict: Record<Lang, Strings> = {
     account: "অ্যাকাউন্ট",
     cash: "নগদ",
     bank: "ব্যাংক",
+    bkash: "বিকাশ",
+    nagad: "নগদ (মোবাইল)",
+    rocket: "রকেট",
     date: "তারিখ",
     noteOptional: "নোট (ঐচ্ছিক)",
     note: "নোট",
@@ -497,6 +503,9 @@ const dict: Record<Lang, Strings> = {
     account: "Account",
     cash: "Cash",
     bank: "Bank",
+    bkash: "bKash",
+    nagad: "Nagad",
+    rocket: "Rocket",
     date: "Date",
     noteOptional: "Note (optional)",
     note: "Note",
