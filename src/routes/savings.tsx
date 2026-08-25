@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useT } from "@/lib/i18n";
 import { useTx } from "@/lib/i18nExtra";
 import { savingsStore } from "@/lib/listStore";
@@ -214,20 +221,18 @@ function MoveForm({
       </div>
       <div>
         <Label>{x.fromAccount}</Label>
-        <div className="mt-1 grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
-          {(["cash", "bank"] as Account[]).map((a) => (
-            <button
-              key={a}
-              type="button"
-              onClick={() => setAccount(a)}
-              className={`rounded-lg py-2 text-sm font-semibold ${
-                account === a ? "bg-card shadow-sm" : "text-muted-foreground"
-              }`}
-            >
-              {a === "cash" ? t.cash : t.bank}
-            </button>
-          ))}
-        </div>
+        <Select value={account} onValueChange={(v) => setAccount(v as Account)}>
+          <SelectTrigger className="mt-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cash">{t.cash}</SelectItem>
+            <SelectItem value="bank">{t.bank}</SelectItem>
+            <SelectItem value="bkash">{t.bkash}</SelectItem>
+            <SelectItem value="nagad">{t.nagad}</SelectItem>
+            <SelectItem value="rocket">{t.rocket}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <Button type="submit" className="h-12 w-full">
         {x.saveBtn}
