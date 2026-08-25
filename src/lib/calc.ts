@@ -1,4 +1,5 @@
-import type { Loan, Transaction, TxSource } from "./types";
+import type { Account, Loan, Transaction, TxSource } from "./types";
+import { ACCOUNTS } from "./types";
 
 /** Sources that only move money around — they must not inflate income/expense. */
 const TRANSFER_SOURCES: TxSource[] = ["loan", "savings", "dps"];
@@ -9,18 +10,21 @@ export function isTransfer(t: Transaction) {
 export function summary(txs: Transaction[]) {
   let income = 0;
   let expense = 0;
-  let cash = 0;
-  let bank = 0;
+  const balances = Object.fromEntries(ACCOUNTS.map((a) => [a, 0])) as Record<Account, number>;
   for (const t of txs) {
     const sign = t.type === "income" ? 1 : -1;
     if (!isTransfer(t)) {
       if (t.type === "income") income += t.amount;
       else expense += t.amount;
     }
-    if (t.account === "cash") cash += sign * t.amount;
-    else bank += sign * t.amount;
+    const acc: Account = t.account in balances ? t.account : "cash";
+    balances[acc] += sign * t.amount;
   }
-  return { income, expense, cash, bank, balance: cash + bank };
+  const cash = balances.cash;
+  const bank = balances.bank;
+  const mobileTotal = balances.bkash + balances.nagad + balances.rocket;
+  const balance = cash + bank + mobileTotal;
+  return { income, expense, cash, bank, balances, mobileTotal, balance };
 }
 
 export function loanSummary(loans: Loan[]) {
