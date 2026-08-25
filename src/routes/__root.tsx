@@ -59,6 +59,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          // Runs before paint so the app never flashes the wrong theme.
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('etracker.theme.v1');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.classList.toggle('dark',t==='dark');}catch(e){}`,
+          }}
+        />
       </head>
       <body>
         {children}
