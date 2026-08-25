@@ -1,5 +1,6 @@
 export type TxType = "income" | "expense";
-export type Account = "cash" | "bank";
+export type Account = "cash" | "bank" | "bkash" | "nagad" | "rocket";
+export const ACCOUNTS: Account[] = ["cash", "bank", "bkash", "nagad", "rocket"];
 
 export type TxSource = "manual" | "loan" | "market" | "savings" | "dps" | "bill";
 
