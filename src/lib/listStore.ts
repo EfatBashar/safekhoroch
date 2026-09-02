@@ -54,7 +54,6 @@ function makeEntityStore<TItem extends WithId>(opts: {
   fromRow: (row: Record<string, unknown>) => TItem;
 }) {
   const { key, table, toRow, fromRow } = opts;
-  const migratedKey = `${key}.supabase.migrated.v1`;
   const listeners = new Set<() => void>();
   let loadStarted = false;
 
@@ -88,25 +87,27 @@ function makeEntityStore<TItem extends WithId>(opts: {
     const cloudItems = ((data ?? []) as Record<string, unknown>[]).map(fromRow);
     const localItems = readAll();
 
-    // One-time migration: if the cloud table is empty but local has data,
-    // upload the local copy so nothing already entered gets lost.
-    if (cloudItems.length === 0 && localItems.length > 0 && localStorage.getItem(migratedKey) !== user.id) {
-      const rows = localItems.map((it) => toRow(it, user.id));
-      const { error: migrationError } = await (supabase.from(table as never) as any).upsert(rows, {
+    // Safe merge — NEVER drop a local-only record just because the
+    // cloud fetch came back without it (missed upload, flaky
+    // connection, slow background sync, etc.). Cloud wins for ids
+    // present in both; local-only records are kept and re-queued
+    // for upload so they become durable too.
+    const cloudIds = new Set(cloudItems.map((it) => it.id));
+    const localOnly = localItems.filter((it) => !cloudIds.has(it.id));
+    const merged = [...localOnly, ...cloudItems];
+
+    writeAll(merged);
+    emit();
+
+    if (localOnly.length > 0) {
+      const rows = localOnly.map((it) => toRow(it, user.id));
+      const { error: resyncError } = await (supabase.from(table as never) as any).upsert(rows, {
         onConflict: "id",
       });
-
-      if (!migrationError) {
-        localStorage.setItem(migratedKey, user.id);
-        emit();
-        return;
+      if (resyncError) {
+        console.error(`[${table}] Re-sync of local-only rows failed:`, resyncError);
       }
-      console.error(`[${table}] Local migration failed:`, migrationError);
     }
-
-    writeAll(cloudItems);
-    localStorage.setItem(migratedKey, user.id);
-    emit();
   }
 
   function ensureLoad() {
@@ -118,12 +119,14 @@ function makeEntityStore<TItem extends WithId>(opts: {
   }
 
   if (typeof window !== "undefined") {
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       loadStarted = false;
       if (session?.user) {
         void loadFromSupabase();
         loadStarted = true;
-      } else {
+      } else if (event === "SIGNED_OUT") {
+        // Only clear on an explicit sign-out — a transient/initial
+        // null-session callback must never wipe local data.
         writeAll([]);
         emit();
       }
