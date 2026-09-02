@@ -97,8 +97,11 @@ function rowToTx(row: {
     amount: Number(row.amount),
     category: row.category ?? "Other",
     account:
-      row.account === "bank"
-        ? "bank"
+      row.account === "bank" ||
+      row.account === "bkash" ||
+      row.account === "nagad" ||
+      row.account === "rocket"
+        ? (row.account as Transaction["account"])
         : "cash",
     note: row.description ?? undefined,
     date: row.transaction_date,
@@ -157,58 +160,29 @@ async function loadTransactionsFromSupabase() {
     );
 
   /*
-   * One-time LocalStorage migration
+   * Safe merge — NEVER drop a local record just because the cloud
+   * fetch came back without it (that can happen after a missed
+   * upload, a flaky connection, or a slow background sync).
+   * Cloud wins for ids that exist in both (so edits/deletes made on
+   * another device still show up); any local-only record is kept
+   * and re-queued for upload so it becomes durable too.
    */
-  if (
-    cloudTransactions.length === 0 &&
-    localTransactions.length > 0 &&
-    localStorage.getItem(
-      TX_MIGRATED_KEY
-    ) !== user.id
-  ) {
-    const rows =
-      localTransactions.map((tx) =>
-        txToRow(tx, user.id)
-      );
+  const cloudIds = new Set(cloudTransactions.map((t) => t.id));
+  const localOnly = localTransactions.filter((t) => !cloudIds.has(t.id));
+  const merged = [...localOnly, ...cloudTransactions];
 
-    const { error: migrationError } =
-      await supabase
-        .from("transactions")
-        .upsert(rows, {
-          onConflict: "id",
-        });
-
-    if (!migrationError) {
-      localStorage.setItem(
-        TX_MIGRATED_KEY,
-        user.id
-      );
-
-      cache[TX_KEY] =
-        localTransactions;
-
-      emit();
-
-      return;
-    }
-
-    console.error(
-      "[Transactions] Local migration failed:",
-      migrationError
-    );
-  }
-
-  writeLocal(
-    TX_KEY,
-    cloudTransactions
-  );
-
-  localStorage.setItem(
-    TX_MIGRATED_KEY,
-    user.id
-  );
-
+  writeLocal(TX_KEY, merged);
   emit();
+
+  if (localOnly.length > 0) {
+    const rows = localOnly.map((tx) => txToRow(tx, user.id));
+    const { error: resyncError } = await supabase
+      .from("transactions")
+      .upsert(rows, { onConflict: "id" });
+    if (resyncError) {
+      console.error("[Transactions] Re-sync of local-only rows failed:", resyncError);
+    }
+  }
 }
 
 function ensureTransactionLoad() {
@@ -301,8 +275,11 @@ function rowToLoan(row: {
       : row.created_at;
 
   const storedAccount =
-    metadata.account === "bank"
-      ? "bank"
+    metadata.account === "bank" ||
+    metadata.account === "bkash" ||
+    metadata.account === "nagad" ||
+    metadata.account === "rocket"
+      ? (metadata.account as Loan["account"])
       : "cash";
 
   const isSettled =
@@ -368,60 +345,25 @@ async function loadLoansFromSupabase() {
     );
 
   /*
-   * One-time migration:
-   * Existing LocalStorage loans are uploaded
-   * if the cloud table is empty.
+   * Safe merge — same reasoning as transactions: never drop a
+   * local-only record just because the cloud fetch didn't have it.
    */
-  if (
-    cloudLoans.length === 0 &&
-    localLoans.length > 0 &&
-    localStorage.getItem(
-      LOAN_MIGRATED_KEY
-    ) !== user.id
-  ) {
-    const rows =
-      localLoans.map((loan) =>
-        loanToRow(loan, user.id)
-      );
+  const cloudIds = new Set(cloudLoans.map((l) => l.id));
+  const localOnly = localLoans.filter((l) => !cloudIds.has(l.id));
+  const merged = [...localOnly, ...cloudLoans];
 
-    const { error: migrationError } =
-      await supabase
-        .from("loans")
-        .upsert(rows, {
-          onConflict: "id",
-        });
-
-    if (!migrationError) {
-      localStorage.setItem(
-        LOAN_MIGRATED_KEY,
-        user.id
-      );
-
-      cache[LOAN_KEY] =
-        localLoans;
-
-      emit();
-
-      return;
-    }
-
-    console.error(
-      "[Loans] Local migration failed:",
-      migrationError
-    );
-  }
-
-  writeLocal(
-    LOAN_KEY,
-    cloudLoans
-  );
-
-  localStorage.setItem(
-    LOAN_MIGRATED_KEY,
-    user.id
-  );
-
+  writeLocal(LOAN_KEY, merged);
   emit();
+
+  if (localOnly.length > 0) {
+    const rows = localOnly.map((loan) => loanToRow(loan, user.id));
+    const { error: resyncError } = await supabase
+      .from("loans")
+      .upsert(rows, { onConflict: "id" });
+    if (resyncError) {
+      console.error("[Loans] Re-sync of local-only rows failed:", resyncError);
+    }
+  }
 }
 
 function ensureLoanLoad() {
@@ -446,7 +388,7 @@ function ensureLoanLoad() {
 
 function setupAuthListener() {
   supabase.auth.onAuthStateChange(
-    (_event, session) => {
+    (event, session) => {
       txLoadStarted = false;
       txLoadPromise = null;
 
@@ -459,7 +401,11 @@ function setupAuthListener() {
 
         txLoadStarted = true;
         loanLoadStarted = true;
-      } else {
+      } else if (event === "SIGNED_OUT") {
+        // Only wipe local data on a genuine, explicit sign-out.
+        // A transient/initial null-session callback (common while the
+        // session is still being restored on page load) must NOT clear
+        // anything, or data entered in that window gets overwritten.
         cache[TX_KEY] = [];
         cache[LOAN_KEY] = [];
 
@@ -539,6 +485,31 @@ export const store = {
         TX_MIGRATED_KEY,
         user.id
       );
+    })();
+  },
+
+  updateTransaction(id: string, patch: Partial<Transaction>) {
+    const all = store.getTransactions().map((t) => (t.id === id ? { ...t, ...patch } : t));
+    const updated = all.find((t) => t.id === id);
+    writeLocal(TX_KEY, all);
+    emit();
+
+    if (!updated) return;
+
+    void (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("transactions")
+        .update(txToRow(updated, user.id))
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("[Transactions] Supabase update failed:", error);
+      }
     })();
   },
 
@@ -761,6 +732,73 @@ export const store = {
       refId:
         loan.id,
     });
+  },
+
+  updateLoan(
+    id: string,
+    patch: Partial<Pick<Loan, "person" | "amount" | "note" | "account" | "date">>
+  ) {
+    const loan = store.getLoans().find((l) => l.id === id);
+    if (!loan) return;
+
+    const updatedLoan: Loan = { ...loan, ...patch };
+
+    const all = store.getLoans().map((l) => (l.id === id ? updatedLoan : l));
+    writeLocal(LOAN_KEY, all);
+    emit();
+
+    void (async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const user = sessionData.session?.user;
+      if (!user) return;
+
+      const { error } = await supabase
+        .from("loans")
+        .update({
+          name: updatedLoan.person,
+          principal: updatedLoan.amount,
+          notes: updatedLoan.note ?? null,
+          metadata: {
+            account: updatedLoan.account ?? "cash",
+            loan_date: updatedLoan.date,
+            settled: updatedLoan.settled,
+          },
+        })
+        .eq("id", id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("[Loans] Supabase update failed:", error);
+      }
+    })();
+
+    // Refresh the linked transaction(s) so balances reflect the edit.
+    store.removeByRef(id);
+    if (!updatedLoan.settled) {
+      store.addLinked({
+        type: updatedLoan.type === "borrow" ? "income" : "expense",
+        amount: updatedLoan.amount,
+        category: updatedLoan.type === "borrow" ? "Borrowed" : "Lent",
+        account: updatedLoan.account ?? "cash",
+        note: updatedLoan.person,
+        date: updatedLoan.date,
+        source: "loan",
+        refId: id,
+      });
+    } else {
+      const settleRef = `${id}:settle`;
+      store.removeByRef(settleRef);
+      store.addLinked({
+        type: updatedLoan.type === "borrow" ? "expense" : "income",
+        amount: updatedLoan.amount,
+        category: updatedLoan.type === "borrow" ? "Loan repaid" : "Loan recovered",
+        account: updatedLoan.account ?? "cash",
+        note: updatedLoan.person,
+        date: new Date().toISOString(),
+        source: "loan",
+        refId: settleRef,
+      });
+    }
   },
 
   toggleLoan(id: string) {
